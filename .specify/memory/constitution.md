@@ -1,13 +1,12 @@
 <!--
 Sync Impact Report
 ===================
-Version change: (new) -> 1.0.0
-Modified principles: N/A (initial ratification)
-Added sections:
-  - Core Principles (5 principles)
-  - Bundle Architecture Constraints
-  - Development Workflow
-  - Governance
+Version change: 1.0.0 -> 1.1.0
+Modified principles:
+  - I. Composition Over Creation: relaxed "MUST NOT introduce new
+    runtime behavior" to permit runtime behavior that follows the
+    Spec Kit extension development pattern
+Added sections: None
 Removed sections: None
 Deferred TODOs: None
 -->
@@ -19,13 +18,22 @@ Deferred TODOs: None
 ### I. Composition Over Creation
 
 Bundles compose existing Spec Kit components (extensions, presets,
-workflows, steps) into a single, versioned, installable unit. A bundle
-MUST NOT introduce new runtime behavior. It is a distribution and
-composition layer over Spec Kit primitives — nothing more.
+workflows, steps) into a single, versioned, installable unit.
+Composition of existing primitives is the default and preferred
+approach.
 
-**Rationale**: Bundles that add runtime behavior blur the boundary
-between distribution and implementation, making upgrades unpredictable
-and debugging harder.
+When a bundle needs runtime behavior that cannot be achieved through
+composition alone, it MAY introduce new behavior provided it follows
+the Spec Kit extension development pattern. Extensions MUST use
+documented Spec Kit extension points, hooks, and lifecycle contracts.
+Custom runtime behavior that bypasses Spec Kit's extension mechanism
+is prohibited.
+
+**Rationale**: Pure composition keeps bundles predictable and
+upgradeable, but some features genuinely require new behavior.
+Channeling that behavior through Spec Kit's extension pattern
+ensures discoverability, testability, and compatibility with the
+platform's lifecycle.
 
 ### II. Spec Kit Native
 
@@ -115,4 +123,4 @@ during spec and plan reviews.
   constitution compliance check. Non-compliance MUST be resolved
   before implementation proceeds.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-07
+**Version**: 1.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-08
