@@ -57,14 +57,14 @@ A user with an existing Spec Kit project wants to install the Trasgo Spec Kit bu
 - **FR-010**: The bundle MUST record provenance for every component it installs, enabling clean removal and update tracking.
 - **FR-011**: Failed installations MUST NOT leave orphaned provenance records; partially installed components MUST be removed on a best-effort basis.
 - **FR-012**: The bundle MUST work with the catalog stack (project, user, built-in scopes) for discovery and resolution.
-- **FR-013**: The project MUST include a catalog JSON file in the repository that is accessible as a raw file via GitHub, containing a `bundles` array with the Trasgo entry (`id`, `name`, `description`, `version`, `role`, `repository`, `release_url`).
+- **FR-013**: The project MUST include a catalog JSON file in the repository that is accessible as a raw file via GitHub, with `schema_version` and a `bundles` object keyed by bundle ID containing the Trasgo entry (`id`, `name`, `description`, `version`, `role`, `download_url`).
 - **FR-014**: The bundle MUST include a `/trasgospec` skill that outputs a hello/greeting message when invoked, serving as a minimal testable component to verify the install flow.
 - **FR-015**: The bundle MUST NOT include default Spec Kit assets (templates, scripts, default workflows) that are already provided by `specify init`. It MUST only declare custom components.
 
 ### Key Entities
 
 - **Bundle Manifest** (`bundle.yml`): Declares the bundle's identity (`id`, `name`, `version`, `role`), requirements (`speckit_version`), target integration (`claude`), and the `provides` section listing custom components with pinned versions. For the initial scaffold, the only provided component is the `/trasgospec` skill.
-- **Catalog File** (`catalog.json`): A JSON file hosted as a raw GitHub file containing a `bundles` array. Each entry includes `id`, `name`, `description`, `version`, `role`, `repository`, and `release_url` pointing to the built `.zip` artifact.
+- **Catalog File** (`catalog.json`): A JSON file hosted as a raw GitHub file with `schema_version` and a `bundles` object keyed by bundle ID. Each entry includes `id`, `name`, `description`, `version`, `role`, and `download_url` pointing to the built `.zip` artifact.
 - **Catalog Source**: A project-scoped catalog registration added by the consumer via `specify bundle catalog add <raw-github-url> --policy install-allowed`, enabling discovery and installation.
 - **Trasgospec Skill**: The `/trasgospec` command — a minimal skill that outputs a hello message. Serves as the testable proof that the bundle install flow works end-to-end.
 - **Provenance Record**: Per-component tracking data written at install time, linking each installed component back to the bundle that contributed it.

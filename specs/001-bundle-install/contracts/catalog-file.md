@@ -11,17 +11,17 @@ JSON file hosted at a publicly accessible URL
 
 ```json
 {
-  "bundles": [
-    {
+  "schema_version": "1.0",
+  "bundles": {
+    "trasgospec": {
       "id": "trasgospec",
       "name": "Trasgo Spec Kit",
       "description": "Scaffold Spec Kit bundle for the claude integration with a /trasgospec hello command",
       "version": "0.1.0",
       "role": "developer",
-      "repository": "https://github.com/<owner>/trasgospec",
-      "release_url": "https://github.com/<owner>/trasgospec/releases/download/v0.1.0/trasgospec-0.1.0.zip"
+      "download_url": "https://github.com/<owner>/trasgospec/releases/download/v0.1.0/trasgospec-0.1.0.zip"
     }
-  ]
+  }
 }
 ```
 
@@ -29,14 +29,14 @@ JSON file hosted at a publicly accessible URL
 
 | Field | Constraint |
 |-------|-----------|
-| `bundles` | Non-empty array of bundle entries |
-| `bundles[].id` | Must match `bundle.yml` id |
-| `bundles[].name` | Must match `bundle.yml` name |
-| `bundles[].version` | Must match `bundle.yml` version |
-| `bundles[].description` | Non-empty string |
-| `bundles[].role` | Must match `bundle.yml` role |
-| `bundles[].repository` | Valid URL to source repository |
-| `bundles[].release_url` | Valid URL to downloadable `.zip` artifact |
+| `schema_version` | Must be `"1.0"` |
+| `bundles` | Non-empty object keyed by bundle ID |
+| `bundles.<id>.id` | Must match `bundle.yml` id and the object key |
+| `bundles.<id>.name` | Must match `bundle.yml` name |
+| `bundles.<id>.version` | Must match `bundle.yml` version |
+| `bundles.<id>.description` | Non-empty string |
+| `bundles.<id>.role` | Must match `bundle.yml` role |
+| `bundles.<id>.download_url` | Valid URL to downloadable `.zip` artifact |
 
 ## Hosting
 
