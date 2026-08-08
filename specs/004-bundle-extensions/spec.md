@@ -1,10 +1,10 @@
-# Feature Specification: Bundle Extension Components
+# Feature Specification: Roadmap Visualization
 
 **Feature Branch**: `004-bundle-extensions`
 
 **Created**: 2026-08-08
 
-**Status**: Draft
+**Status**: Complete
 
 **Input**: Restructure the trasgo-spec-kit bundle so its two components (hello and roadmap) are registered as extensions with proper extension.yml manifests, enabling the spec-kit installer to recognize and install them.
 
