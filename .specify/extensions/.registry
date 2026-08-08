@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "trasgospec": {
+      "version": "0.2.0",
+      "source": "local",
+      "manifest_hash": "sha256:1935b6d2c2c74bdbef6db461638858a4aa33ffe5f8f40c8d51e2de2bfa66d981",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.trasgospec.hello",
+          "trasgospec.hello",
+          "speckit.trasgospec.roadmap",
+          "trasgospec.roadmap"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-08-08T16:14:54.383367+00:00"
+    }
+  }
+}

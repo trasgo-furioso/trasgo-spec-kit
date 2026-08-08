@@ -1,0 +1,25 @@
+schema_version: "1.0"
+
+extension:
+  id: "trasgospec"
+  name: "Trasgo Spec Kit"
+  version: "0.2.0"
+  description: "Journey-first product specification commands for spec-driven development."
+  author: "Trasgo Furioso [https://github.com/trasgo-furioso]"
+  license: "MIT"
+  category: "utility"
+  effect: "read-only"
+
+requires:
+  speckit_version: ">=0.15.0"
+
+provides:
+  commands:
+    - name: "speckit.trasgospec.hello"
+      file: "commands/speckit.trasgospec.hello.md"
+      description: "Verify Trasgo Spec Kit bundle installation."
+      aliases: ["trasgospec.hello"]
+    - name: "speckit.trasgospec.roadmap"
+      file: "commands/speckit.trasgospec.roadmap.md"
+      description: "View the project roadmap as a markdown table showing all feature specs."
+      aliases: ["trasgospec.roadmap"]
