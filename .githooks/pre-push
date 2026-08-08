@@ -186,6 +186,18 @@ if [ -z "$bundle_id" ] || [ -z "$bundle_version" ]; then
     exit 4
 fi
 
+# --- Extract dynamic extension metadata from extension.yml ------------------
+_ext_yml="$REPO_ROOT/bundle/extensions/$bundle_id/extension.yml"
+ext_cmd_count=0
+ext_effect="read-only"
+if [ -f "$_ext_yml" ]; then
+    # Count command entries (lines matching "- name:")
+    ext_cmd_count="$(grep -c '^ *- name:' "$_ext_yml" 2>/dev/null)" || ext_cmd_count=0
+    # Extract effect field
+    _eff="$(_extract_yml_field "$_ext_yml" "effect")"
+    [ -n "$_eff" ] && ext_effect="$_eff"
+fi
+
 # --- Parse git remote URL for owner/repo ------------------------------------
 
 _parse_github_remote() {
@@ -305,12 +317,12 @@ _update_ext_catalog() {
       "repository": "https://github.com/${owner_repo}",
       "license": "MIT",
       "category": "utility",
-      "effect": "read-only",
+      "effect": "$(json_escape "$ext_effect")",
       "requires": {
         "speckit_version": ">=0.15.0"
       },
       "provides": {
-        "commands": 2
+        "commands": ${ext_cmd_count}
       },
       "tags": ["specification", "roadmap", "journey", "workflow"],
       "verified": false,
@@ -331,6 +343,8 @@ EXT_CATALOG_EOF
         -e "s|\"description\": *\"[^\"]*\"|\"description\": \"$(json_escape "$bundle_description")\"|" \
         -e "s|\"download_url\": *\"[^\"]*${bundle_id}-extension[^\"]*\"|\"download_url\": \"$(json_escape "$ext_download_url")\"|" \
         -e "s|\"updated_at\": *\"[^\"]*\"|\"updated_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"|" \
+        -e "s|\"effect\": *\"[^\"]*\"|\"effect\": \"$(json_escape "$ext_effect")\"|" \
+        -e "s|\"commands\": *[0-9]*|\"commands\": ${ext_cmd_count}|" \
         "$catalog" > "$tmp_catalog"
 
     mv "$tmp_catalog" "$catalog"
