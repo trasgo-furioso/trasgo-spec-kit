@@ -5,10 +5,16 @@ __pycache__/
 *.pyo
 *.egg-info/
 
-# Bundle artifacts
+# Bundle build artifacts (root-level ZIPs are tracked; bundle/ copies are not)
 dist/
-*.zip
-!trasgospec-*.zip
+bundle/*.zip
+
+# Spec Kit installed extensions and cache (generated on `specify bundle install`)
+.specify/extensions/
+.specify/bundle-records.json
+
+# Auto-generated skill files from installed extensions
+.claude/skills/speckit-trasgospec-*/
 
 # OS
 .DS_Store
