@@ -118,7 +118,7 @@ class TestDirectoryAndScaffold:
         assert "**Who**:" in prd_content
         assert "**Current Alternatives**:" in prd_content
         assert "**Desired Outcome**:" in prd_content
-        assert "## User Stories Overview" in prd_content
+        assert "## Jobs to Be Done" in prd_content
         assert "## Assumptions" in prd_content
         assert "## Research Findings" in prd_content
 

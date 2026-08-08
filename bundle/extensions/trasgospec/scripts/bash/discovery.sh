@@ -129,7 +129,7 @@ cat > "$PRD_PATH" <<SCAFFOLD
 
 **Desired Outcome**:
 
-## User Stories Overview
+## Jobs to Be Done
 
 ## Assumptions
 
