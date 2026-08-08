@@ -31,3 +31,7 @@ provides:
       file: "commands/speckit.trasgospec.flow-nudge.md"
       description: "Suggest PR lifecycle actions at workflow milestones."
       aliases: ["trasgospec.flow-nudge"]
+    - name: "speckit.trasgospec.discovery"
+      file: "commands/speckit.trasgospec.discovery.md"
+      description: "Guide interactive problem exploration and produce a structured PRD."
+      aliases: ["trasgospec.discovery"]

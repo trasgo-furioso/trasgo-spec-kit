@@ -8,6 +8,26 @@
 
 **Input**: User description: "$ARGUMENTS"
 
+## Problem Statement *(mandatory)*
+
+<!--
+  Start with the problem, not the solution. Be specific about:
+  - What pain point exists?
+  - Who experiences it?
+  - Why existing solutions don't work?
+  - What success looks like (measurable outcomes)?
+
+  Keep this section focused - don't jump into implementation details.
+-->
+
+**Pain Point**: [What specific problem or frustration exists?]
+
+**Who**: [Who experiences this problem? Be specific about the user/persona.]
+
+**Current Alternatives**: [Why don't existing solutions work?]
+
+**Desired Outcome**: [What does success look like, in measurable terms?]
+
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
