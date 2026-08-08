@@ -7,45 +7,68 @@
 
 - Spec Kit (`specify` CLI) installed, version >= 0.15.0
 - Trasgo Spec Kit bundle installed (v0.2.0+)
-- A Spec Kit project with at least one feature spec in `specs/`
-
-## Validation Scenarios
-
-### Scenario 1: View Roadmap with Multiple Specs
-
-1. Open a Spec Kit project that has 2+ feature specs in `specs/`
-2. Invoke `/trasgospec-roadmap`
-3. **Expected**: A markdown table listing all specs with columns ID, Title, Status, Created, ordered by spec number
-
-Example output:
-```markdown
-| ID  | Title                  | Status | Created    |
-|-----|------------------------|--------|------------|
-| 001 | Bundle Install         | Draft  | 2026-08-07 |
-| 002 | Roadmap Visualization  | Draft  | 2026-08-08 |
-```
-
-### Scenario 2: Empty Project
-
-1. Open a Spec Kit project with no `specs/` directory or an empty one
-2. Invoke `/trasgospec-roadmap`
-3. **Expected**: A clear message indicating no features have been specified yet
-
-### Scenario 3: Spec with Missing Metadata
-
-1. Create a spec directory with a `spec.md` that has no `**Status**:` field
-2. Invoke `/trasgospec-roadmap`
-3. **Expected**: The spec appears in the table with "Unknown" for the missing field
-
-### Scenario 4: Directory Without spec.md
-
-1. Create a subdirectory in `specs/` that contains no `spec.md` file
-2. Invoke `/trasgospec-roadmap`
-3. **Expected**: That directory is silently skipped; other valid specs display normally
+- Python 3.11+ with pytest (dev-only)
 
 ## Running Tests
 
+All validation is done through pytest. Never run bash commands
+manually — encapsulate them in tests.
+
+### Unit Tests (script contract)
+
 ```bash
 cd /Users/trasgofurioso/Code/trasgo-spec-kit
-pytest tests/integration/test_us1_roadmap.py -v
+pytest tests/unit/test_scan_specs.py -v
 ```
+
+Validates: JSON contract output, metadata extraction, fallback
+values, directory filtering, sorting, special character escaping.
+
+### Integration Tests (acceptance scenarios)
+
+```bash
+# US1: View project roadmap
+pytest tests/integration/test_us1_roadmap.py -v
+
+# US2: Empty/single-spec projects
+pytest tests/integration/test_us2_roadmap.py -v
+
+# US3: Incomplete specs
+pytest tests/integration/test_us3_roadmap.py -v
+```
+
+### Full Suite
+
+```bash
+pytest tests/ -v
+```
+
+## Validation Scenarios
+
+### Scenario 1: Multiple Specs (US1)
+
+Test creates a `tmp_path` project with 3 spec directories, each
+containing a `spec.md` with different statuses. Runs `scan-specs.sh`
+and asserts JSON output contains all 3 specs ordered by directory
+name.
+
+Expected JSON (see [contract](contracts/scan-specs-output.md)):
+```json
+{"specs_dir":"specs","specs":[{"id":"001-alpha","title":"Alpha","status":"Draft","created":"2026-08-01"},{"id":"002-beta","title":"Beta","status":"In Progress","created":"2026-08-02"},{"id":"003-gamma","title":"Gamma","status":"Complete","created":"2026-08-03"}]}
+```
+
+### Scenario 2: Empty Project (US2)
+
+Test creates a `tmp_path` project with no `specs/` directory.
+Runs script and asserts `{"specs_dir":"specs","specs":[]}`.
+
+### Scenario 3: Missing Metadata (US3)
+
+Test creates a `spec.md` missing the `**Status**:` field.
+Runs script and asserts the entry has `"status":"Unknown"`.
+
+### Scenario 4: End-to-End Command
+
+After all tests pass, invoke `/speckit-trasgospec-roadmap` in this
+project and verify markdown table output matches the script's JSON
+data.

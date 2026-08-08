@@ -4,10 +4,10 @@
     "trasgospec": {
       "id": "trasgospec",
       "name": "Trasgo Spec Kit",
-      "description": "Scaffold Spec Kit bundle for the claude integration with a /trasgospec hello command",
-      "version": "0.1.0",
+      "description": "Journey-first product specification for spec-driven development with /trasgospec hello and /trasgospec-roadmap visualization commands",
+      "version": "0.2.0",
       "role": "developer",
-      "download_url": "https://github.com/trasgospec/trasgospec/releases/download/v0.1.0/trasgospec-0.1.0.zip"
+      "download_url": "https://github.com/trasgospec/trasgospec/releases/download/v0.2.0/trasgospec-0.2.0.zip"
     }
   }
 }
