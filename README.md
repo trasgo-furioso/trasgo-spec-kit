@@ -43,7 +43,7 @@ Pushes that don't touch `bundle/` pass through silently. Validation failures blo
 ### Tests
 
 ```bash
-.venv/bin/pytest tests/unit/ -v
+pytest tests/unit/ -v
 ```
 
 ## Components
