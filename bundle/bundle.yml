@@ -1,0 +1,21 @@
+schema_version: "1.0"
+
+bundle:
+  id: trasgospec
+  name: Trasgo Spec Kit
+  version: "0.1.0"
+  description: >-
+    Scaffold Spec Kit bundle for the claude integration
+    with a /trasgospec hello command
+  author: trasgospec
+  license: MIT
+  role: developer
+  integration: claude
+
+requires:
+  speckit_version: ">=0.15.0"
+
+provides:
+  skills:
+    - id: trasgospec
+      version: "0.1.0"

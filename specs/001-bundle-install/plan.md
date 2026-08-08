@@ -76,12 +76,14 @@ specs/001-bundle-install/
 ### Source Code (repository root)
 
 ```text
-trasgospec/                         # Project root = Bundle root
-├── bundle.yml                      # Bundle manifest (FR-001)
+trasgospec/                         # Project root
+├── bundle/                         # Bundle source (input for specify bundle build)
+│   ├── bundle.yml                  # Bundle manifest (FR-001)
+│   ├── README.md                   # Bundle README (required by build)
+│   └── skills/
+│       └── trasgospec/
+│           └── SKILL.md            # /trasgospec hello command (FR-014)
 ├── catalog.json                    # Self-hosted catalog (FR-013)
-├── skills/                         # Bundle-provided components
-│   └── trasgospec/
-│       └── SKILL.md                # /trasgospec hello command (FR-014)
 ├── tests/                          # Dev-only (NOT in bundle artifact)
 │   └── integration/
 │       ├── conftest.py             # Shared fixtures (HTTP server, temp dirs, cleanup)
@@ -98,9 +100,8 @@ trasgospec/                         # Project root = Bundle root
 └── specs/                          # Feature specs (NOT bundled)
 ```
 
-**Structure Decision**: The bundle root is the project root. `bundle.yml`
-and `catalog.json` live at the root. The custom `/trasgospec` skill lives
-under `skills/trasgospec/` (separate from default SK skills in
-`.claude/skills/`). Tests are at `tests/integration/` and excluded from
-the bundle artifact. The `.venv/` is created locally and auto-activated
-via direnv.
+**Structure Decision**: Bundle source files live in `bundle/` (separate
+from project root) so `specify bundle build --path bundle/` produces a
+clean artifact without dev files. `catalog.json` lives at the project
+root for HTTP serving during tests. Tests are at `tests/integration/`.
+The `.venv/` is auto-activated via direnv.
