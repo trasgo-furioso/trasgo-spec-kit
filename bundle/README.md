@@ -16,8 +16,8 @@ A curated bundle of [GitHub Spec Kit](https://github.com/github/spec-kit).
 
 ```bash
 # Add both the bundle catalog and extension catalog
-specify bundle catalog add https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/refs/heads/main/catalog.json --policy install-allowed
-specify extension catalog add https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/refs/heads/main/extension-catalog.json --name trasgospec --install-allowed
+specify bundle catalog add https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/main/catalog.json --policy install-allowed
+specify extension catalog add https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/main/extension-catalog.json --name trasgospec --install-allowed
 
 # Install the bundle
 specify bundle install trasgospec

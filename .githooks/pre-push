@@ -222,10 +222,10 @@ fi
 # --- Update catalog.json ----------------------------------------------------
 
 zip_filename="${bundle_id}-${bundle_version}.zip"
-download_url="https://raw.githubusercontent.com/${owner_repo}/refs/heads/main/${zip_filename}"
+download_url="https://raw.githubusercontent.com/${owner_repo}/main/${zip_filename}"
 
 ext_zip_filename="${bundle_id}-extension-${bundle_version}.zip"
-ext_download_url="https://raw.githubusercontent.com/${owner_repo}/refs/heads/main/${ext_zip_filename}"
+ext_download_url="https://raw.githubusercontent.com/${owner_repo}/main/${ext_zip_filename}"
 
 catalog_file="$REPO_ROOT/catalog.json"
 ext_catalog_file="$REPO_ROOT/extension-catalog.json"
@@ -301,7 +301,7 @@ _update_ext_catalog() {
 {
   "schema_version": "1.0",
   "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "catalog_url": "https://raw.githubusercontent.com/${owner_repo}/refs/heads/main/extension-catalog.json",
+  "catalog_url": "https://raw.githubusercontent.com/${owner_repo}/main/extension-catalog.json",
   "extensions": {
     "$(json_escape "$bundle_id")": {
       "name": "$(json_escape "$bundle_name")",

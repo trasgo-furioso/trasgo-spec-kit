@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-08-08T16:04:10Z",
-  "catalog_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/refs/heads/main/extension-catalog.json",
+  "catalog_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/main/extension-catalog.json",
   "extensions": {
     "trasgospec": {
       "name": "Trasgo Spec Kit",
@@ -9,7 +9,7 @@
       "version": "0.2.0",
       "description": "Journey-first product specification for spec-driven development",
       "author": "Trasgo Furioso (@trasgo-furioso)",
-      "download_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/refs/heads/main/trasgospec-extension-0.2.0.zip",
+      "download_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/main/trasgospec-extension-0.2.0.zip",
       "repository": "https://github.com/trasgo-furioso/trasgo-spec-kit",
       "license": "MIT",
       "category": "utility",
