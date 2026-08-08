@@ -21,14 +21,15 @@ def run_specify(*args, cwd):
 
 
 class TestIntegrationMismatch:
-    """T019: Given a project with non-claude integration,
-    When specify bundle install trasgospec, Then no components are applied.
+    """Given a project with non-claude integration and extension catalog,
+    When specify bundle install trasgospec, Then extension still installs.
 
-    Note: The specify CLI does not abort on integration mismatch for
-    local path installs — it succeeds but applies 0 components.
+    Note: Extensions are integration-agnostic — they install regardless of
+    the project's active integration. The bundle itself may be
+    integration-specific, but its extension components are not filtered.
     """
 
-    def test_mismatch_installs_zero_components(self, tmp_path):
+    def test_mismatch_still_installs_extension(self, tmp_path, extension_catalog_url):
         # Arrange — init with a different integration
         project_dir = tmp_path / "speckit-project"
         project_dir.mkdir()
@@ -38,18 +39,27 @@ class TestIntegrationMismatch:
         )
         assert init_result.returncode == 0, f"init failed: {init_result.stdout}"
 
+        # Add extension catalog so the extension can be resolved
+        run_specify(
+            "extension", "catalog", "add",
+            extension_catalog_url,
+            "--name", "trasgospec",
+            "--install-allowed",
+            cwd=project_dir,
+        )
+
         # Act
         result = run_specify(
             "bundle", "install", str(BUNDLE_ROOT),
             cwd=project_dir,
         )
 
-        # Assert — install succeeds but applies 0 components
-        assert "0 added" in result.stdout
+        # Assert — extensions are integration-agnostic, so they install
+        assert result.returncode == 0
 
 
 class TestMissingCatalogSource:
-    """T020: Given a clean project with NO catalog source,
+    """Given a clean project with NO catalog source,
     When specify bundle install trasgospec (by ID), Then fail with not found."""
 
     def test_missing_catalog_fails(self, clean_project):
@@ -64,7 +74,7 @@ class TestMissingCatalogSource:
 
 
 class TestUnreachableCatalog:
-    """T021: Given a catalog pointing to stopped server,
+    """Given a catalog pointing to stopped server,
     When specify bundle install trasgospec, Then fail with network error."""
 
     def test_unreachable_catalog_fails(self, clean_project):
@@ -83,4 +93,19 @@ class TestUnreachableCatalog:
         )
 
         # Assert
+        assert result.returncode != 0
+
+
+class TestMissingExtensionCatalog:
+    """Given a project with bundle catalog but NO extension catalog,
+    When specify bundle install trasgospec, Then fail with extension not found."""
+
+    def test_missing_extension_catalog_fails(self, clean_project):
+        # Act — install from local path without extension catalog
+        result = run_specify(
+            "bundle", "install", str(BUNDLE_ROOT),
+            cwd=clean_project,
+        )
+
+        # Assert — should fail because extension can't be resolved
         assert result.returncode != 0

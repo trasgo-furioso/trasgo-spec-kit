@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SCAN_SPECS_SCRIPT = PROJECT_ROOT / "bundle" / "scripts" / "bash" / "scan-specs.sh"
+SCAN_SPECS_SCRIPT = PROJECT_ROOT / "bundle" / "extensions" / "trasgospec" / "scripts" / "bash" / "scan-specs.sh"
 
 
 def run_scan_specs(project_dir: Path) -> dict:

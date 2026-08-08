@@ -224,7 +224,11 @@ fi
 zip_filename="${bundle_id}-${bundle_version}.zip"
 download_url="https://raw.githubusercontent.com/${owner_repo}/refs/heads/main/${zip_filename}"
 
+ext_zip_filename="${bundle_id}-extension-${bundle_version}.zip"
+ext_download_url="https://raw.githubusercontent.com/${owner_repo}/refs/heads/main/${ext_zip_filename}"
+
 catalog_file="$REPO_ROOT/catalog.json"
+ext_catalog_file="$REPO_ROOT/extension-catalog.json"
 
 _update_catalog() {
     local catalog="$1"
@@ -262,10 +266,90 @@ CATALOG_EOF
     mv "$tmp_catalog" "$catalog"
 }
 
+# --- Build extension zip -----------------------------------------------------
+
+ext_dir="$REPO_ROOT/bundle/extensions/$bundle_id"
+if [ -d "$ext_dir" ] && [ -f "$ext_dir/extension.yml" ]; then
+    log "Building extension zip..."
+    ext_zip_path="$REPO_ROOT/$ext_zip_filename"
+    # Remove old zip if exists
+    rm -f "$ext_zip_path"
+    # Build zip from extension directory
+    if ! (cd "$ext_dir" && zip -r "$ext_zip_path" . -x "*.DS_Store" >/dev/null 2>&1); then
+        log "ERROR: Failed to build extension zip."
+        exit 2
+    fi
+    log "Built $ext_zip_filename"
+fi
+
+# --- Update catalogs ---------------------------------------------------------
+
 log "Updating catalog.json (v${bundle_version})"
 if ! _update_catalog "$catalog_file"; then
     log "ERROR: Failed to update catalog.json"
     exit 4
+fi
+
+# --- Update extension-catalog.json -------------------------------------------
+
+_update_ext_catalog() {
+    local catalog="$1"
+
+    if [ ! -f "$catalog" ]; then
+        # Create extension catalog from scratch
+        cat > "$catalog" <<EXT_CATALOG_EOF
+{
+  "schema_version": "1.0",
+  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "catalog_url": "https://raw.githubusercontent.com/${owner_repo}/refs/heads/main/extension-catalog.json",
+  "extensions": {
+    "$(json_escape "$bundle_id")": {
+      "name": "$(json_escape "$bundle_name")",
+      "id": "$(json_escape "$bundle_id")",
+      "version": "$(json_escape "$bundle_version")",
+      "description": "$(json_escape "$bundle_description")",
+      "author": "Trasgo Furioso (@trasgo-furioso)",
+      "download_url": "$(json_escape "$ext_download_url")",
+      "repository": "https://github.com/${owner_repo}",
+      "license": "MIT",
+      "category": "utility",
+      "effect": "read-only",
+      "requires": {
+        "speckit_version": ">=0.15.0"
+      },
+      "provides": {
+        "commands": 2
+      },
+      "tags": ["specification", "roadmap", "journey", "workflow"],
+      "verified": false,
+      "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+      "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    }
+  }
+}
+EXT_CATALOG_EOF
+        return 0
+    fi
+
+    # Update existing extension catalog fields using sed
+    local tmp_catalog="${catalog}.tmp"
+    sed \
+        -e "s|\"version\": *\"[^\"]*\"|\"version\": \"$(json_escape "$bundle_version")\"|" \
+        -e "s|\"name\": *\"[^\"]*\"|\"name\": \"$(json_escape "$bundle_name")\"|" \
+        -e "s|\"description\": *\"[^\"]*\"|\"description\": \"$(json_escape "$bundle_description")\"|" \
+        -e "s|\"download_url\": *\"[^\"]*${bundle_id}-extension[^\"]*\"|\"download_url\": \"$(json_escape "$ext_download_url")\"|" \
+        -e "s|\"updated_at\": *\"[^\"]*\"|\"updated_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"|" \
+        "$catalog" > "$tmp_catalog"
+
+    mv "$tmp_catalog" "$catalog"
+}
+
+if [ -d "$ext_dir" ] && [ -f "$ext_dir/extension.yml" ]; then
+    log "Updating extension-catalog.json (v${bundle_version})"
+    if ! _update_ext_catalog "$ext_catalog_file"; then
+        log "ERROR: Failed to update extension-catalog.json"
+        exit 4
+    fi
 fi
 
 # --- Auto-commit artifacts ---------------------------------------------------
@@ -281,7 +365,14 @@ if ! git -C "$REPO_ROOT" diff --quiet 2>/dev/null || \
 fi
 
 # Stage build artifacts
-if ! git -C "$REPO_ROOT" add -f "$REPO_ROOT/$zip_filename" "$catalog_file" 2>/dev/null; then
+stage_files=("$REPO_ROOT/$zip_filename" "$catalog_file")
+if [ -f "$REPO_ROOT/$ext_zip_filename" ]; then
+    stage_files+=("$REPO_ROOT/$ext_zip_filename")
+fi
+if [ -f "$ext_catalog_file" ]; then
+    stage_files+=("$ext_catalog_file")
+fi
+if ! git -C "$REPO_ROOT" add -f "${stage_files[@]}" 2>/dev/null; then
     log "ERROR: Failed to stage build artifacts."
     if [ "$stash_applied" = true ]; then
         git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true

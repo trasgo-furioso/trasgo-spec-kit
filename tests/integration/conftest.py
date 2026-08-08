@@ -15,43 +15,69 @@ import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BUNDLE_ROOT = PROJECT_ROOT / "bundle"
+EXTENSION_DIR = BUNDLE_ROOT / "extensions" / "trasgospec"
 CATALOG_PORT = 8888
 
-# Test catalog that points download_url to the local HTTP server
-_TEST_CATALOG = {
+# Test bundle catalog that points download_url to the local HTTP server
+_TEST_BUNDLE_CATALOG = {
     "schema_version": "1.0",
     "bundles": {
         "trasgospec": {
             "id": "trasgospec",
             "name": "Trasgo Spec Kit",
             "description": "Scaffold Spec Kit bundle for the claude integration",
-            "version": "0.1.0",
+            "version": "0.2.0",
             "role": "developer",
-            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-0.1.0.zip",
+            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-0.2.0.zip",
+        }
+    },
+}
+
+# Test extension catalog that points download_url to the local HTTP server
+_TEST_EXTENSION_CATALOG = {
+    "schema_version": "1.0",
+    "updated_at": "2026-08-08T00:00:00Z",
+    "extensions": {
+        "trasgospec": {
+            "name": "Trasgo Spec Kit",
+            "id": "trasgospec",
+            "version": "0.2.0",
+            "description": "Journey-first product specification commands.",
+            "author": "Trasgo Furioso",
+            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-extension-0.2.0.zip",
+            "license": "MIT",
+            "category": "utility",
+            "effect": "read-only",
+            "requires": {"speckit_version": ">=0.15.0"},
+            "provides": {"commands": 2},
+            "tags": ["specification"],
+            "verified": False,
         }
     },
 }
 
 
 class _CatalogHandler(http.server.SimpleHTTPRequestHandler):
-    """Serves files from the project root directory.
-
-    Serves test-catalog.json (generated) and trasgospec-0.1.0.zip (built artifact).
-    """
+    """Serves catalogs and artifacts from the project root directory."""
 
     def __init__(self, *args, directory=None, **kwargs):
         super().__init__(*args, directory=str(PROJECT_ROOT), **kwargs)
 
     def do_GET(self):
         if self.path == "/test-catalog.json":
-            payload = json.dumps(_TEST_CATALOG).encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", len(payload))
-            self.end_headers()
-            self.wfile.write(payload)
+            self._serve_json(_TEST_BUNDLE_CATALOG)
+        elif self.path == "/test-ext-catalog.json":
+            self._serve_json(_TEST_EXTENSION_CATALOG)
         else:
             super().do_GET()
+
+    def _serve_json(self, data):
+        payload = json.dumps(data).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", len(payload))
+        self.end_headers()
+        self.wfile.write(payload)
 
     def log_message(self, format, *args):
         pass  # silence request logs during tests
@@ -59,7 +85,7 @@ class _CatalogHandler(http.server.SimpleHTTPRequestHandler):
 
 @pytest.fixture(scope="session")
 def catalog_server():
-    """Session-scoped HTTP server serving catalog and artifacts on localhost:8888."""
+    """Session-scoped HTTP server serving catalogs and artifacts on localhost:8888."""
     server = http.server.HTTPServer(("localhost", CATALOG_PORT), _CatalogHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -69,8 +95,14 @@ def catalog_server():
 
 @pytest.fixture(scope="session")
 def catalog_url(catalog_server):
-    """Returns the URL to the test catalog served by the local HTTP server."""
+    """Returns the URL to the test bundle catalog served by the local HTTP server."""
     return f"http://localhost:{CATALOG_PORT}/test-catalog.json"
+
+
+@pytest.fixture(scope="session")
+def extension_catalog_url(catalog_server):
+    """Returns the URL to the test extension catalog served by the local HTTP server."""
+    return f"http://localhost:{CATALOG_PORT}/test-ext-catalog.json"
 
 
 @pytest.fixture
@@ -89,8 +121,9 @@ def clean_project(tmp_path):
 
 
 @pytest.fixture
-def project_with_catalog(clean_project, catalog_url):
-    """Clean project with Trasgo catalog source already added."""
+def project_with_catalog(clean_project, catalog_url, extension_catalog_url):
+    """Clean project with both bundle and extension catalog sources added."""
+    # Add bundle catalog
     result = subprocess.run(
         [
             "specify", "bundle", "catalog", "add",
@@ -101,7 +134,40 @@ def project_with_catalog(clean_project, catalog_url):
         capture_output=True,
         text=True,
     )
-    assert result.returncode == 0, f"catalog add failed: {result.stderr}"
+    assert result.returncode == 0, f"bundle catalog add failed: {result.stderr}"
+
+    # Add extension catalog
+    result = subprocess.run(
+        [
+            "specify", "extension", "catalog", "add",
+            extension_catalog_url,
+            "--name", "trasgospec",
+            "--install-allowed",
+        ],
+        cwd=clean_project,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, f"extension catalog add failed: {result.stderr}"
+
+    return clean_project
+
+
+@pytest.fixture
+def project_with_extension_catalog(clean_project, extension_catalog_url):
+    """Clean project with only the extension catalog source added."""
+    result = subprocess.run(
+        [
+            "specify", "extension", "catalog", "add",
+            extension_catalog_url,
+            "--name", "trasgospec",
+            "--install-allowed",
+        ],
+        cwd=clean_project,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, f"extension catalog add failed: {result.stderr}"
     return clean_project
 
 

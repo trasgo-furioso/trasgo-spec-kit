@@ -51,6 +51,20 @@ def write_bundle_yml(path: Path, version: str = "0.3.0", bundle_id: str = "testb
     """))
 
 
+def write_extension(path: Path, bundle_id: str = "testbundle", version: str = "0.3.0"):
+    """Write a minimal extension inside bundle/extensions/{bundle_id}/."""
+    ext_dir = path / "bundle" / "extensions" / bundle_id
+    ext_dir.mkdir(parents=True, exist_ok=True)
+    (ext_dir / "extension.yml").write_text(textwrap.dedent(f"""\
+        schema_version: "1.0"
+        extension:
+          id: {bundle_id}
+          name: Test Extension
+          version: "{version}"
+          description: A test extension
+    """))
+
+
 def write_catalog_json(path: Path, bundle_id: str = "testbundle",
                        version: str = "0.1.0"):
     """Write an initial catalog.json."""
@@ -497,6 +511,51 @@ class TestEdgeCases:
 
         assert result.returncode == 4
         assert "bundle.yml" in result.stderr
+
+    def test_builds_extension_zip_when_extension_exists(self, tmp_path):
+        """Hook should build extension zip alongside bundle zip."""
+        repo = make_git_repo(tmp_path)
+        write_bundle_yml(repo, version="0.3.0", bundle_id="testbundle")
+        write_extension(repo, bundle_id="testbundle", version="0.3.0")
+        write_catalog_json(repo, bundle_id="testbundle", version="0.1.0")
+        bin_dir = create_specify_stub(repo)
+        make_initial_commit(repo)
+
+        initial_sha = get_head_sha(repo)
+        make_bundle_change_commit(repo)
+
+        env = {"PATH": f"{bin_dir}:{os.environ['PATH']}"}
+        stdin = build_stdin(get_head_sha(repo), initial_sha)
+        result = run_hook(repo, stdin, env_extra=env)
+
+        assert result.returncode == 6
+        assert (repo / "testbundle-0.3.0.zip").exists()
+        assert (repo / "testbundle-extension-0.3.0.zip").exists()
+
+    def test_creates_extension_catalog_when_extension_exists(self, tmp_path):
+        """Hook should create/update extension-catalog.json when extension exists."""
+        repo = make_git_repo(tmp_path)
+        write_bundle_yml(repo, version="0.3.0", bundle_id="testbundle")
+        write_extension(repo, bundle_id="testbundle", version="0.3.0")
+        write_catalog_json(repo, bundle_id="testbundle", version="0.1.0")
+        bin_dir = create_specify_stub(repo)
+        make_initial_commit(repo)
+
+        initial_sha = get_head_sha(repo)
+        make_bundle_change_commit(repo)
+
+        env = {"PATH": f"{bin_dir}:{os.environ['PATH']}"}
+        stdin = build_stdin(get_head_sha(repo), initial_sha)
+        result = run_hook(repo, stdin, env_extra=env)
+
+        assert result.returncode == 6
+        assert (repo / "extension-catalog.json").exists()
+        ext_catalog = json.loads((repo / "extension-catalog.json").read_text())
+        assert ext_catalog["schema_version"] == "1.0"
+        ext = ext_catalog["extensions"]["testbundle"]
+        assert ext["version"] == "0.3.0"
+        assert "testbundle-extension-0.3.0.zip" in ext["download_url"]
+        assert "test-owner/test-repo" in ext["download_url"]
 
     def test_allows_push_when_artifacts_already_uptodate(self, tmp_path):
         """Hook should exit 0 when build produces no new changes to commit."""

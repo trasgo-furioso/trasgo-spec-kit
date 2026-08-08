@@ -15,7 +15,11 @@ A curated bundle of [GitHub Spec Kit](https://github.com/github/spec-kit).
 ## Install
 
 ```bash
+# Add both the bundle catalog and extension catalog
 specify bundle catalog add https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/refs/heads/main/catalog.json --policy install-allowed
+specify extension catalog add https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/refs/heads/main/extension-catalog.json --name trasgospec --install-allowed
+
+# Install the bundle
 specify bundle install trasgospec
 ```
 
@@ -48,4 +52,5 @@ pytest tests/unit/ -v
 
 ## Components
 
-- `/trasgospec` — Hello command to verify bundle install
+- `/speckit-trasgospec-hello` — Verify bundle installation
+- `/speckit-trasgospec-roadmap` — View project roadmap as a markdown table

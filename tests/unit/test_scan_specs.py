@@ -1,4 +1,4 @@
-"""Unit tests for bundle/scripts/bash/scan-specs.sh.
+"""Unit tests for bundle/extensions/trasgospec-roadmap/scripts/bash/scan-specs.sh.
 
 Tests validate the script's JSON contract output per
 specs/002-roadmap-visualization/contracts/scan-specs-output.md.
@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SCAN_SPECS_SCRIPT = PROJECT_ROOT / "bundle" / "scripts" / "bash" / "scan-specs.sh"
+SCAN_SPECS_SCRIPT = PROJECT_ROOT / "bundle" / "extensions" / "trasgospec" / "scripts" / "bash" / "scan-specs.sh"
 
 
 def run_scan_specs(project_dir: Path) -> dict:

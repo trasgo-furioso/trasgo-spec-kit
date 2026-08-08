@@ -1,7 +1,7 @@
 ---
 description: View the project roadmap as a markdown table showing all feature specs with their ID, title, status, and creation date.
 scripts:
-  sh: bundle/scripts/bash/scan-specs.sh
+  sh: scripts/bash/scan-specs.sh
 ---
 
 ## User Input

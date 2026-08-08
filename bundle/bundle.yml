@@ -15,8 +15,6 @@ requires:
   speckit_version: ">=0.15.0"
 
 provides:
-  skills:
+  extensions:
     - id: trasgospec
-      version: "0.1.0"
-    - id: trasgospec-roadmap
       version: "0.2.0"
