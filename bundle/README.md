@@ -22,4 +22,4 @@ specify bundle install trasgospec
 ## Components
 
 - `/trasgospec` — Hello command to verify bundle install
-- `/trasgospec-roadmap` — Roadmap visualization
+- `/trasgospec-roadmap` — Roadmap visualization 
