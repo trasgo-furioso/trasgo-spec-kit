@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-08-08T16:14:54Z",
+  "updated_at": "2026-08-08T18:33:16Z",
   "bundles": [
     {
       "bundle_id": "trasgospec",
-      "version": "0.2.0",
-      "installed_at": "2026-08-08T16:14:54Z",
+      "version": "0.3.0",
+      "installed_at": "2026-08-08T18:33:16Z",
       "contributed_components": [
         {
           "kind": "extensions",
           "id": "trasgospec",
-          "version": "0.2.0"
+          "version": "0.3.0"
         }
       ]
     }

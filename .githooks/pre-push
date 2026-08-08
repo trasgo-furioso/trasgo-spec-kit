@@ -282,15 +282,7 @@ if [ -d "$ext_dir" ] && [ -f "$ext_dir/extension.yml" ]; then
     log "Built $ext_zip_filename"
 fi
 
-# --- Update catalogs ---------------------------------------------------------
-
-log "Updating catalog.json (v${bundle_version})"
-if ! _update_catalog "$catalog_file"; then
-    log "ERROR: Failed to update catalog.json"
-    exit 4
-fi
-
-# --- Update extension-catalog.json -------------------------------------------
+# --- Define extension catalog update function --------------------------------
 
 _update_ext_catalog() {
     local catalog="$1"
@@ -344,24 +336,39 @@ EXT_CATALOG_EOF
     mv "$tmp_catalog" "$catalog"
 }
 
-if [ -d "$ext_dir" ] && [ -f "$ext_dir/extension.yml" ]; then
-    log "Updating extension-catalog.json (v${bundle_version})"
-    if ! _update_ext_catalog "$ext_catalog_file"; then
-        log "ERROR: Failed to update extension-catalog.json"
-        exit 4
-    fi
-fi
-
 # --- Auto-commit artifacts ---------------------------------------------------
 
 log "Creating build commit..."
 
-# Stash any uncommitted changes
+# Stash any uncommitted changes BEFORE updating catalogs,
+# so catalog updates happen on a clean working tree and get
+# correctly staged and committed.
 stash_applied=false
 if ! git -C "$REPO_ROOT" diff --quiet 2>/dev/null || \
    ! git -C "$REPO_ROOT" diff --cached --quiet 2>/dev/null; then
     git -C "$REPO_ROOT" stash push -q -m "bundle-build: temp stash" 2>/dev/null || true
     stash_applied=true
+fi
+
+# Update catalogs after stash so changes are not stashed away
+log "Updating catalog.json (v${bundle_version})"
+if ! _update_catalog "$catalog_file"; then
+    log "ERROR: Failed to update catalog.json"
+    if [ "$stash_applied" = true ]; then
+        git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
+    fi
+    exit 4
+fi
+
+if [ -d "$ext_dir" ] && [ -f "$ext_dir/extension.yml" ]; then
+    log "Updating extension-catalog.json (v${bundle_version})"
+    if ! _update_ext_catalog "$ext_catalog_file"; then
+        log "ERROR: Failed to update extension-catalog.json"
+        if [ "$stash_applied" = true ]; then
+            git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
+        fi
+        exit 4
+    fi
 fi
 
 # Stage build artifacts
