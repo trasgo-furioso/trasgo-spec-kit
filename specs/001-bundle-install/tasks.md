@@ -6,7 +6,7 @@
 
 **Tests**: Integration tests are REQUIRED (TDD). Acceptance scenarios from user stories translate to pytest tests using Given (Arrange) / When (Act) / Then (Assert). Tests MUST be written and fail BEFORE implementation.
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organization**: Tasks are grouped by feature area to enable independent implementation and testing.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -14,7 +14,11 @@
 - **[Story]**: Which user story this task belongs to (e.g., US1)
 - Include exact file paths in descriptions
 
-## Phase 1: Setup (Shared Infrastructure)
+---
+
+## Part A: Bundle Install & Distribution
+
+### Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Project initialization — Python dev environment, directory structure, gitignore
 
@@ -26,7 +30,7 @@
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+### Phase 2: Foundational (Blocking Prerequisites)
 
 **Purpose**: Test infrastructure and minimal bundle stub that all tests depend on
 
@@ -40,13 +44,13 @@
 
 ---
 
-## Phase 3: User Story 1 - Install Trasgo Bundle from Self-Hosted Catalog (Priority: P1) MVP
+### Phase 3: User Story 1 - Install Trasgo Bundle from Self-Hosted Catalog (Priority: P1) MVP
 
 **Goal**: A user can add the Trasgo catalog source, install the bundle by catalog identifier, and verify it appears in the bundle list
 
 **Independent Test**: Add catalog source via local HTTP server, run `specify bundle install trasgospec`, then verify `specify bundle list` shows trasgospec with version 0.1.0
 
-### Tests for User Story 1
+#### Tests for User Story 1
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
@@ -56,7 +60,7 @@
 - [x] T012 [P] [US1] Integration test: install from local path in tests/integration/test_us1_install.py — Given a clean Spec Kit project, When `specify bundle install <bundle-dir>` (local path), Then exit code 0 and bundle list shows trasgospec v0.1.0
 - [x] T013 [US1] Integration test: install initializes uninitialized project in tests/integration/test_us1_install.py — Given a directory that is NOT a Spec Kit project, When `specify bundle install <bundle-dir>`, Then project is initialized and bundle is installed
 
-### Implementation for User Story 1
+#### Implementation for User Story 1
 
 - [x] T014 [US1] Complete bundle.yml manifest at project root: add provides.skills entry for trasgospec with pinned version 0.1.0, per contracts/bundle-manifest.md
 - [x] T015 [US1] Create catalog.json at project root with bundles array containing trasgospec entry (id, name, description, version, role, repository, release_url) per contracts/catalog-file.md — needed for catalog-based install tests
@@ -68,20 +72,112 @@
 
 ---
 
-## Phase 4: Edge Cases & Final Validation
+### Phase 4: Edge Cases & Final Validation
 
 **Purpose**: Edge case coverage and final validation
 
-### Edge Case Tests
+#### Edge Case Tests
 
 - [x] T019 [P] Integration test: integration mismatch in tests/integration/test_edge_cases.py — Given a Spec Kit project initialized with a non-claude integration, When `specify bundle install trasgospec`, Then install applies 0 components (CLI does not abort for local path installs)
 - [x] T020 [P] Integration test: missing catalog source in tests/integration/test_edge_cases.py — Given a clean Spec Kit project with NO Trasgo catalog source added, When `specify bundle install trasgospec` (by catalog ID), Then install fails with error indicating bundle not found in any active catalog
 - [x] T021 [P] Integration test: unreachable catalog in tests/integration/test_edge_cases.py — Given a catalog source pointing to a stopped HTTP server, When `specify bundle install trasgospec`, Then install fails with a clear network error and no partial state is written
 
-### Final Validation
+#### Final Validation
 
 - [x] T022 Run full integration test suite: pytest tests/integration/ -v — all 11 tests pass
 - [x] T023 Run quickstart.md validation scenarios — verified via full test suite (catalog install, local path install, idempotency, edge cases)
+
+---
+
+## Part B: Build Automation (Pre-Push Hook)
+
+### Phase 5: Build CI Setup
+
+**Purpose**: Create directory structure and configuration for git hooks
+
+- [x] T024 Create `.githooks/` and `scripts/` directories at repository root
+- [x] T025 Add `.gitignore` negation pattern `!trasgospec-*.zip` to allow bundle zip artifact while keeping general `*.zip` ignore
+
+---
+
+### Phase 6: Hook Foundational (Blocking Prerequisites)
+
+**Purpose**: Pre-push hook skeleton that all build automation tests depend on
+
+- [x] T026 Create pre-push hook skeleton in `.githooks/pre-push` with shebang (`#!/usr/bin/env bash`), `set -euo pipefail`, `[bundle-build]` log prefix function, repo root discovery via `.specify` marker walk-up, and json_escape helper
+
+**Checkpoint**: Hook skeleton exists and is executable — user story implementation can begin
+
+---
+
+### Phase 7: User Story 2 - Automated Bundle Build on Push (Priority: P1) MVP
+
+**Goal**: When a developer pushes commits with `bundle/` changes to main, the hook validates, builds, updates catalog.json, and auto-commits artifacts before the push proceeds.
+
+#### Tests for User Story 2
+
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+
+- [x] T027 [P] [US2] Write failing tests for bundle change detection (detects bundle/ changes, ignores non-bundle changes) and validate+build execution (runs `specify bundle validate` then `specify bundle build`, blocks on failure) in `tests/unit/test_pre_push_hook.py`
+- [x] T028 [P] [US2] Write failing tests for catalog.json update (syncs version/description/download_url from bundle.yml, constructs raw.githubusercontent.com URL from git remote) and auto-commit creation (new commit with zip + catalog.json, original commits untouched) in `tests/unit/test_pre_push_hook.py`
+
+#### Implementation for User Story 2
+
+- [x] T029 [US2] Implement stdin ref parsing, main branch detection, and bundle change detection via `git diff --name-only <remote-sha>..<local-sha> -- bundle/` in `.githooks/pre-push`
+- [x] T030 [US2] Implement `specify` CLI availability check, `specify bundle validate --path bundle`, and `specify bundle build --path bundle --output .` execution with exit code handling per `contracts/hook-exit-codes.md` in `.githooks/pre-push`
+- [x] T031 [US2] Implement git remote URL parsing (SSH and HTTPS formats) and catalog.json update (sync id, name, version, description, role, download_url from bundle.yml) per `contracts/catalog-update.md` in `.githooks/pre-push`
+- [x] T032 [US2] Implement working tree stash, `git add` of zip artifact and catalog.json, `git commit -m "chore: build bundle vX.Y.Z"`, and stash restore flow in `.githooks/pre-push`
+
+**Checkpoint**: Pre-push hook validates, builds, updates catalog, and auto-commits on bundle changes. US2 is fully functional.
+
+---
+
+### Phase 8: User Story 3 - No Build for Non-Bundle Changes (Priority: P2)
+
+**Goal**: Pushes that don't touch `bundle/` skip all build steps silently.
+
+#### Tests for User Story 3
+
+- [x] T033 [US3] Write failing test verifying hook exits silently (exit 0, no stderr output, no auto-commit) when pushed commits contain no `bundle/` file changes in `tests/unit/test_pre_push_hook.py`
+
+**Checkpoint**: Non-bundle pushes pass through silently with no side effects.
+
+---
+
+### Phase 9: User Story 4 - Developer Hook Setup (Priority: P2)
+
+**Goal**: A single script invocation activates the pre-push hook for a developer after cloning.
+
+#### Tests for User Story 4
+
+- [x] T034 [P] [US4] Write failing tests for setup script: configures `core.hooksPath` to `.githooks`, is idempotent (second run succeeds without errors), and exits with error outside a git repository in `tests/unit/test_setup.py`
+
+#### Implementation for User Story 4
+
+- [x] T035 [US4] Implement setup script in `scripts/setup.sh` that runs `git config core.hooksPath .githooks`, verifies `.githooks/` directory exists, and outputs confirmation message
+
+**Checkpoint**: Developer can activate hooks with a single command. Setup is idempotent.
+
+---
+
+### Phase 10: User Story 5 - Catalog Version Consistency (Priority: P3)
+
+**Goal**: After every build, catalog.json version and description match bundle.yml exactly.
+
+#### Tests for User Story 5
+
+- [x] T036 [US5] Write failing tests verifying catalog.json `version` and `description` fields match the corresponding values from `bundle/bundle.yml` after a successful hook execution in `tests/unit/test_pre_push_hook.py`
+
+**Checkpoint**: Catalog always reflects the manifest's version and description after a build.
+
+---
+
+### Phase 11: Polish & Cross-Cutting Concerns
+
+**Purpose**: Edge cases, robustness, and end-to-end validation
+
+- [x] T037 [P] Add edge case handling in `.githooks/pre-push`: create catalog.json from scratch if missing, handle bundle.yml parse errors with clear error messages (exit 4)
+- [x] T038 Run end-to-end validation scenarios from `quickstart.md` to verify all user stories work together
 
 ---
 
@@ -89,54 +185,26 @@
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)**: No dependencies — can start immediately
-- **Foundational (Phase 2)**: Depends on Setup completion — BLOCKS all tests
-- **US1 (Phase 3)**: Depends on Foundational — MVP, complete first
-- **Edge Cases & Validation (Phase 4)**: Depends on US1 completion
-
-### Within User Story 1
-
-- Tests MUST be written and FAIL before implementation
-- Implementation makes tests pass
-- Validate at checkpoint before moving to edge cases
+- **Part A — Setup (Phase 1)**: No dependencies — can start immediately
+- **Part A — Foundational (Phase 2)**: Depends on Setup completion — BLOCKS all tests
+- **Part A — US1 (Phase 3)**: Depends on Foundational — MVP, complete first
+- **Part A — Edge Cases (Phase 4)**: Depends on US1 completion
+- **Part B — Build CI Setup (Phase 5)**: Can start after Part A Phase 1
+- **Part B — Hook Foundational (Phase 6)**: Depends on Phase 5
+- **Part B — US2 (Phase 7)**: Depends on Phase 6 — core hook logic
+- **Part B — US3 (Phase 8)**: Depends on Phase 7 (detection logic in T029)
+- **Part B — US4 (Phase 9)**: Depends on Phase 6 only — independent of US2/US3
+- **Part B — US5 (Phase 10)**: Depends on Phase 7 (catalog update in T031)
+- **Part B — Polish (Phase 11)**: Depends on all user stories being complete
 
 ### Parallel Opportunities
 
 - T004 and T005 can run in parallel (different files)
-- T009, T010, T011, T012 can run in parallel (same file, different test functions — written together)
+- T009, T010, T011, T012 can run in parallel (same file, different test functions)
 - T019, T020, T021 can run in parallel (same file, different test functions)
-
----
-
-## Parallel Example: User Story 1
-
-```bash
-# Write all US1 tests together (different functions in same file):
-Task: "Integration test: install via catalog in tests/integration/test_us1_install.py"
-Task: "Integration test: bundle list after install in tests/integration/test_us1_install.py"
-Task: "Integration test: idempotent reinstall in tests/integration/test_us1_install.py"
-Task: "Integration test: install from local path in tests/integration/test_us1_install.py"
-
-# Then implement (sequential — each step depends on previous):
-Task: "Complete bundle.yml manifest"
-Task: "Create catalog.json"
-Task: "Validate bundle manifest"
-Task: "Build bundle artifact"
-Task: "Run US1 integration tests"
-```
-
----
-
-## Implementation Strategy
-
-### MVP (User Story 1)
-
-1. Complete Phase 1: Setup (venv, deps, dirs)
-2. Complete Phase 2: Foundational (conftest with HTTP server fixture, bundle stub, SKILL.md)
-3. Complete Phase 3: User Story 1 (tests → implement → validate)
-4. **STOP and VALIDATE**: Run US1 tests, verify install via catalog and local path
-5. Bundle is installable via self-hosted catalog — MVP achieved
-6. Complete Phase 4: Edge cases + final validation
+- T027 and T028 can run in parallel (different test classes)
+- T034 can run in parallel with T027/T028 (different test file)
+- US4 (Phase 9) can run in parallel with US2 (Phase 7) after foundational phase
 
 ---
 
@@ -147,5 +215,6 @@ Task: "Run US1 integration tests"
 - Python deps (pytest) are dev-only — bundle artifact contains no Python code
 - The `specify` CLI handles install/remove/search behavior — our implementation is the correct bundle.yml, catalog.json, and SKILL.md files
 - Tests shell out to `specify` CLI via subprocess and verify exit codes + stdout
-- **Catalog testing strategy**: During dev time, the self-hosted catalog is a local file served by a tiny Python HTTP server at `http://localhost:8888/{filename}.json`. The conftest.py session-scoped fixture starts this server before tests and stops it after. All tests that need catalog access use this fixture rather than hitting GitHub.
+- All bash scripts target bash 3.2+ (macOS compatibility)
+- Hook stderr uses `[bundle-build]` prefix per contracts/hook-exit-codes.md
 - Commit after each task or logical group

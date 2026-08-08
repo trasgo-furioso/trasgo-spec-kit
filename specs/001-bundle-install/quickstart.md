@@ -7,7 +7,7 @@
 - Spec Kit CLI installed (`specify` command available)
 - Python 3.11+ installed
 - direnv installed and hooked into shell
-- Git installed
+- Git 2.9+ installed
 
 ## Setup
 
@@ -25,21 +25,29 @@ direnv auto-activates the `.venv` on entry.
 pip install -r requirements-dev.txt
 ```
 
-### 3. Validate the bundle manifest
+### 3. Activate git hooks
 
 ```bash
-specify bundle validate
+bash scripts/setup.sh
+```
+
+Expected: `core.hooksPath` configured to `.githooks`.
+
+### 4. Validate the bundle manifest
+
+```bash
+specify bundle validate --path bundle
 ```
 
 Expected: All checks pass, no errors.
 
-### 4. Build the bundle artifact
+### 5. Build the bundle artifact
 
 ```bash
-specify bundle build
+specify bundle build --path bundle --output .
 ```
 
-Expected: Produces `trasgospec-0.1.0.zip` in the output directory.
+Expected: Produces `trasgospec-<version>.zip` in the repository root.
 
 ## Validation Scenarios
 
@@ -51,16 +59,16 @@ mkdir /tmp/test-project && cd /tmp/test-project
 specify init --integration claude
 
 # Install from local bundle directory
-specify bundle install /path/to/trasgospec
+specify bundle install /path/to/trasgospec/bundle
 
 # Verify
 specify bundle list
 ```
 
-Expected: `trasgospec` appears in the list with version `0.1.0`,
-component count `1`, and install timestamp.
+Expected: `trasgospec` appears in the list with version, component
+count, and install timestamp.
 
-### Scenario 2: Install from catalog (US1 + US2)
+### Scenario 2: Install from catalog (US1)
 
 ```bash
 # Create a clean test project
@@ -97,30 +105,80 @@ specify bundle list
 
 Expected: No errors, no duplicate components, same list output.
 
-### Scenario 4: Clean removal (US3)
+### Scenario 4: Automated build on push (US2)
 
 ```bash
-# Remove the bundle
-specify bundle remove trasgospec
+# Make a change to bundle files
+echo "# test" >> bundle/README.md
+git add bundle/README.md
+git commit -m "test: trigger build"
 
-# Verify
-specify bundle list
+# Push (hook runs automatically)
+git push
 ```
 
-Expected: `trasgospec` no longer appears in the list.
+Expected: Hook validates bundle, builds zip, updates catalog.json,
+creates a separate "chore: build bundle" commit, push succeeds.
 
-## Running Integration Tests
+### Scenario 5: No build for non-bundle changes (US3)
+
+```bash
+# Make a change outside bundle/
+echo "# test" >> README.md
+git add README.md
+git commit -m "docs: update readme"
+
+# Push (hook skips silently)
+git push
+```
+
+Expected: No validation, no build, no extra commit. Push proceeds
+immediately.
+
+### Scenario 6: Developer hook setup (US4)
+
+```bash
+# In a fresh clone
+bash scripts/setup.sh
+
+# Verify
+git config core.hooksPath
+```
+
+Expected: Output is `.githooks`. Running setup.sh again produces
+the same result without errors.
+
+### Scenario 7: Version consistency (US5)
+
+```bash
+# After a successful build, compare versions
+grep 'version:' bundle/bundle.yml
+grep '"version"' catalog.json
+```
+
+Expected: Both show the same version string.
+
+## Running Tests
 
 ```bash
 cd trasgospec
-pytest tests/integration/ -v
+
+# All tests
+.venv/bin/pytest tests/ -v
+
+# Unit tests only (hook + setup script)
+.venv/bin/pytest tests/unit/ -v
+
+# Integration tests only (bundle install)
+.venv/bin/pytest tests/integration/ -v
 ```
 
-Expected: All tests pass. Tests cover US1, US2, and US3 acceptance
-scenarios using Given/When/Then → Arrange/Act/Assert.
+Expected: All tests pass.
 
 ## Key Files Reference
 
 - Bundle manifest: see [bundle-manifest.md](contracts/bundle-manifest.md)
 - Catalog file: see [catalog-file.md](contracts/catalog-file.md)
+- Catalog update contract: see [catalog-update.md](contracts/catalog-update.md)
+- Hook exit codes: see [hook-exit-codes.md](contracts/hook-exit-codes.md)
 - Data model: see [data-model.md](data-model.md)
