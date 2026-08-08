@@ -1,11 +1,12 @@
 <!--
 Sync Impact Report
 ===================
-Version change: 1.1.0 -> 1.2.0
+Version change: 1.2.0 -> 1.3.0
 Modified principles: None
 Added sections:
-  - Extension Development Pattern (new section between Bundle
-    Architecture Constraints and Development Workflow)
+  - Principle VI: Test-Driven Development (new core principle)
+  - Task Organization subsection in Development Workflow
+  - Testing Constraints subsection in Development Workflow
 Removed sections: None
 Deferred TODOs: None
 -->
@@ -78,6 +79,29 @@ update time through the bundle's own machinery.
 
 **Rationale**: Unpinned versions produce non-reproducible environments.
 Explicit pins guarantee that every consumer gets the same stack.
+
+### VI. Test-Driven Development
+
+All feature work MUST follow a strict TDD cycle: tests are written
+FIRST and MUST fail (red) before any implementation code is written.
+Only after the failing test is confirmed does implementation proceed
+to make the test pass (green), followed by refactoring if needed.
+
+- Tests MUST be written and executed exclusively via **pytest**. No
+  other test runner is permitted.
+- Test execution MUST occur through the pytest tool integration —
+  developers MUST NOT run test commands manually via bash/shell.
+- Each implementation task MUST begin with a failing test that
+  validates the expected behavior before the production code exists.
+- The red-green-refactor cycle is non-negotiable and MUST be
+  verifiable in commit history (test commits preceding or
+  accompanying implementation commits).
+
+**Rationale**: Writing tests first forces precise specification of
+behavior before implementation, catches design flaws early, and
+produces a comprehensive regression suite as a natural byproduct.
+Standardizing on pytest ensures consistent tooling and reporting
+across the project.
 
 ## Bundle Architecture Constraints
 
@@ -159,6 +183,21 @@ Location: `bundle/scripts/bash/<script-name>.sh` (and/or
 - Reference non-default catalog URLs in documentation when the
   bundle depends on components from those catalogs.
 
+### Task Organization
+
+Tasks MUST be grouped by user story. Each user story represents a
+cohesive unit of user-facing value, and its tasks MUST be listed
+together in dependency order beneath it. This grouping applies to
+`tasks.md` generation and any task tracking artifacts.
+
+### Testing Constraints
+
+- All tests MUST use **pytest** as the sole test framework.
+- Test execution MUST occur through pytest tool integration, never
+  via manual bash/shell commands.
+- Every implementation task MUST begin with writing a failing test
+  before any production code.
+
 ## Governance
 
 This constitution supersedes all other development practices for
@@ -176,4 +215,4 @@ during spec and plan reviews.
   constitution compliance check. Non-compliance MUST be resolved
   before implementation proceeds.
 
-**Version**: 1.2.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-08
+**Version**: 1.3.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-08
