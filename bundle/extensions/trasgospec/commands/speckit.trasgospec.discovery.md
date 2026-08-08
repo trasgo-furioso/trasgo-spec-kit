@@ -30,7 +30,7 @@ Guide users through interactive problem exploration before they commit to a spec
    | Who | empty / partial / complete |
    | Current Alternatives | empty / partial / complete |
    | Desired Outcome | empty / partial / complete |
-   | User Stories Overview | empty / partial / complete |
+   | Jobs to Be Done | empty / partial / complete |
    | Assumptions | empty / partial / complete |
 
    Ask about the least-covered topic first. Follow the natural conversation flow rather than a fixed sequence. Assume users have product sense and can navigate the exploration.
@@ -83,10 +83,9 @@ The `prd.md` follows this structure:
 
 **Desired Outcome**: [from conversation]
 
-## User Stories Overview
+## Jobs to Be Done
 
-- [Story sketch 1]
-- [Story sketch 2]
+- When [situation], I want to [motivation], so I can [outcome]
 
 ## Assumptions
 
