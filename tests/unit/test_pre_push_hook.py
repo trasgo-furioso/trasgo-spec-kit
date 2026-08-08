@@ -206,9 +206,11 @@ class TestBundleChangeDetection:
         stdin = build_stdin(head_sha, initial_sha)
         result = run_hook(repo, stdin, env_extra=env)
 
-        assert result.returncode == 0
+        # First push blocks (exit 6) after creating build commit
+        assert result.returncode == 6
         assert "[bundle-build] Validating bundle..." in result.stderr
         assert "[bundle-build] Building bundle..." in result.stderr
+        assert "Run 'git push' again" in result.stderr
 
     def test_skips_non_bundle_changes(self, tmp_path):
         """Hook should exit silently when no bundle/ files changed."""
@@ -225,6 +227,31 @@ class TestBundleChangeDetection:
 
         assert result.returncode == 0
         assert result.stderr == ""
+
+    def test_retry_push_succeeds_after_build_commit(self, tmp_path):
+        """Second push should succeed because HEAD is already a build commit."""
+        repo = make_git_repo(tmp_path)
+        write_bundle_yml(repo)
+        write_catalog_json(repo)
+        bin_dir = create_specify_stub(repo)
+        make_initial_commit(repo)
+
+        initial_sha = get_head_sha(repo)
+        make_bundle_change_commit(repo)
+        head_sha = get_head_sha(repo)
+
+        env = {"PATH": f"{bin_dir}:{os.environ['PATH']}"}
+        stdin = build_stdin(head_sha, initial_sha)
+
+        # First push: builds and blocks
+        result1 = run_hook(repo, stdin, env_extra=env)
+        assert result1.returncode == 6
+
+        # Second push: HEAD is now "chore: build bundle v*", should skip
+        new_head = get_head_sha(repo)
+        stdin2 = build_stdin(new_head, initial_sha)
+        result2 = run_hook(repo, stdin2, env_extra=env)
+        assert result2.returncode == 0
 
     def test_skips_push_to_non_main_branch(self, tmp_path):
         """Hook should skip when pushing to a branch other than main."""
@@ -308,7 +335,7 @@ class TestCatalogUpdate:
         stdin = build_stdin(head_sha, initial_sha)
         result = run_hook(repo, stdin, env_extra=env)
 
-        assert result.returncode == 0
+        assert result.returncode == 6
         catalog = json.loads((repo / "catalog.json").read_text())
         bundle = catalog["bundles"]["testbundle"]
         assert bundle["version"] == "0.3.0"
@@ -333,7 +360,7 @@ class TestCatalogUpdate:
         stdin = build_stdin(head_sha, initial_sha)
         result = run_hook(repo, stdin, env_extra=env)
 
-        assert result.returncode == 0
+        assert result.returncode == 6
         catalog = json.loads((repo / "catalog.json").read_text())
         bundle = catalog["bundles"]["testbundle"]
         assert bundle["name"] == "New Name"
@@ -359,7 +386,7 @@ class TestAutoCommit:
         stdin = build_stdin(pre_hook_sha, initial_sha)
         result = run_hook(repo, stdin, env_extra=env)
 
-        assert result.returncode == 0
+        assert result.returncode == 6
 
         # Verify a new commit was created
         post_hook_sha = get_head_sha(repo)
@@ -387,7 +414,7 @@ class TestAutoCommit:
         stdin = build_stdin(get_head_sha(repo), initial_sha)
         result = run_hook(repo, stdin, env_extra=env)
 
-        assert result.returncode == 0
+        assert result.returncode == 6
 
         # Verify original commit still exists in log
         log_result = subprocess.run(
@@ -412,7 +439,7 @@ class TestAutoCommit:
         stdin = build_stdin(get_head_sha(repo), initial_sha)
         result = run_hook(repo, stdin, env_extra=env)
 
-        assert result.returncode == 0
+        assert result.returncode == 6
         assert (repo / "testbundle-0.3.0.zip").exists()
 
 
@@ -440,7 +467,7 @@ class TestEdgeCases:
         stdin = build_stdin(get_head_sha(repo), initial_sha)
         result = run_hook(repo, stdin, env_extra=env)
 
-        assert result.returncode == 0
+        assert result.returncode == 6
         assert (repo / "catalog.json").exists()
         catalog = json.loads((repo / "catalog.json").read_text())
         assert catalog["schema_version"] == "1.0"

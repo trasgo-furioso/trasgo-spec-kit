@@ -33,12 +33,10 @@ This configures `git core.hooksPath` to use the tracked `.githooks/` directory, 
 
 ### Bundle Build Automation
 
-A pre-push hook automatically validates and builds the bundle when you push changes to `bundle/` on main:
+A pre-push hook automatically validates and builds the bundle when you push changes to `bundle/` on main. The flow requires two pushes:
 
-1. Runs `specify bundle validate --path bundle`
-2. Runs `specify bundle build --path bundle --output .`
-3. Updates `catalog.json` with the current version and download URL
-4. Creates a separate `chore: build bundle vX.Y.Z` commit
+1. **First `git push`**: The hook validates, builds, updates `catalog.json`, creates a `chore: build bundle vX.Y.Z` commit, and **blocks the push** (the new commit can't be added to an in-flight push).
+2. **Second `git push`**: The hook detects the build commit is already at HEAD and lets the push through, including all artifacts.
 
 Pushes that don't touch `bundle/` pass through silently. Validation failures block the push.
 

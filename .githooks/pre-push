@@ -78,6 +78,14 @@ if [ "$has_bundle_changes" = false ]; then
     exit 0
 fi
 
+# Skip if HEAD is already a build commit (retry after previous build)
+head_msg="$(git -C "$REPO_ROOT" log -1 --format='%s' 2>/dev/null || true)"
+case "$head_msg" in
+    "chore: build bundle v"*)
+        exit 0
+        ;;
+esac
+
 # --- Check prerequisites ----------------------------------------------------
 
 if ! command -v specify >/dev/null 2>&1; then
@@ -295,5 +303,6 @@ if [ "$stash_applied" = true ]; then
 fi
 
 log "Created commit: chore: build bundle v${bundle_version}"
-log "Done."
-exit 0
+log ""
+log "Build artifacts committed. Run 'git push' again to include them."
+exit 6
