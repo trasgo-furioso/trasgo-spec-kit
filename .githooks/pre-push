@@ -280,13 +280,24 @@ if ! git -C "$REPO_ROOT" diff --quiet 2>/dev/null || \
     stash_applied=true
 fi
 
-# Stage and commit build artifacts
+# Stage build artifacts
 if ! git -C "$REPO_ROOT" add -f "$REPO_ROOT/$zip_filename" "$catalog_file" 2>/dev/null; then
     log "ERROR: Failed to stage build artifacts."
     if [ "$stash_applied" = true ]; then
         git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
     fi
     exit 5
+fi
+
+# Check if there are staged changes to commit
+if git -C "$REPO_ROOT" diff --cached --quiet 2>/dev/null; then
+    # Nothing to commit — artifacts already up-to-date
+    log "Artifacts already up-to-date. No build commit needed."
+    if [ "$stash_applied" = true ]; then
+        git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
+    fi
+    log "Done."
+    exit 0
 fi
 
 if ! git -C "$REPO_ROOT" commit -q -m "chore: build bundle v${bundle_version}" 2>/dev/null; then

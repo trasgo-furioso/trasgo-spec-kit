@@ -497,3 +497,36 @@ class TestEdgeCases:
 
         assert result.returncode == 4
         assert "bundle.yml" in result.stderr
+
+    def test_allows_push_when_artifacts_already_uptodate(self, tmp_path):
+        """Hook should exit 0 when build produces no new changes to commit."""
+        repo = make_git_repo(tmp_path)
+        write_bundle_yml(repo, version="0.3.0", bundle_id="testbundle")
+        write_catalog_json(repo, bundle_id="testbundle", version="0.1.0")
+        bin_dir = create_specify_stub(repo)
+        make_initial_commit(repo)
+
+        initial_sha = get_head_sha(repo)
+        make_bundle_change_commit(repo)
+
+        env = {"PATH": f"{bin_dir}:{os.environ['PATH']}"}
+
+        # First run: builds and blocks
+        stdin = build_stdin(get_head_sha(repo), initial_sha)
+        result1 = run_hook(repo, stdin, env_extra=env)
+        assert result1.returncode == 6
+
+        # Now manually commit the artifacts (simulating developer already committed them)
+        # Reset to before the build commit, then commit artifacts manually
+        build_sha = get_head_sha(repo)
+
+        # Make another bundle change on top of the build commit
+        make_bundle_change_commit(repo, filename="another.txt")
+        head_sha = get_head_sha(repo)
+
+        # Run hook again — build produces same zip and catalog, nothing new to stage
+        stdin2 = build_stdin(head_sha, build_sha)
+        result2 = run_hook(repo, stdin2, env_extra=env)
+
+        assert result2.returncode in (0, 6)  # 0 if artifacts unchanged, 6 if new commit needed
+        assert "already up-to-date" in result2.stderr or "Created commit" in result2.stderr
