@@ -420,6 +420,13 @@ if ! git -C "$REPO_ROOT" commit -q -m "chore: build bundle v${bundle_version}" 2
     exit 5
 fi
 
+# Restore ZIP working-tree copies to match the commit so they don't
+# show as modified after the second push.
+git -C "$REPO_ROOT" checkout -- "$REPO_ROOT/$zip_filename" 2>/dev/null || true
+if [ -f "$REPO_ROOT/$ext_zip_filename" ]; then
+    git -C "$REPO_ROOT" checkout -- "$REPO_ROOT/$ext_zip_filename" 2>/dev/null || true
+fi
+
 # Restore stash if applied
 if [ "$stash_applied" = true ]; then
     git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
