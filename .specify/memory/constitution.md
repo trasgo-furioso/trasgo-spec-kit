@@ -1,12 +1,11 @@
 <!--
 Sync Impact Report
 ===================
-Version change: 1.0.0 -> 1.1.0
-Modified principles:
-  - I. Composition Over Creation: relaxed "MUST NOT introduce new
-    runtime behavior" to permit runtime behavior that follows the
-    Spec Kit extension development pattern
-Added sections: None
+Version change: 1.1.0 -> 1.2.0
+Modified principles: None
+Added sections:
+  - Extension Development Pattern (new section between Bundle
+    Architecture Constraints and Development Workflow)
 Removed sections: None
 Deferred TODOs: None
 -->
@@ -94,6 +93,60 @@ Explicit pins guarantee that every consumer gets the same stack.
 - On installation failure, no provenance record is written and
   partially installed components are removed on a best-effort basis.
 
+## Extension Development Pattern
+
+When a bundle introduces new runtime behavior (per Principle I), it
+MUST follow this two-component pattern:
+
+### Command File
+
+Location: `bundle/commands/<dot.namespaced.id>.md`
+
+- MUST include YAML frontmatter with `description` and `scripts`
+  keys.
+- The `scripts` key MUST declare platform-specific script paths
+  (`sh` for bash, `ps` for PowerShell).
+- The markdown body contains AI agent instructions: it MUST invoke
+  the declared script, parse its JSON output, and handle
+  presentation and edge-case messaging.
+- The command MUST NOT perform deterministic calculations itself;
+  all deterministic work MUST be delegated to the script.
+
+### Script File
+
+Location: `bundle/scripts/bash/<script-name>.sh` (and/or
+`bundle/scripts/powershell/<script-name>.ps1`)
+
+- MUST be deterministic only — no AI calls, no judgment, no
+  presentation logic.
+- MUST emit a stable JSON contract on stdout (single line).
+  Diagnostics go to stderr.
+- MUST target bash 3.2+ for macOS compatibility (no `mapfile`,
+  no `readarray`, no process substitution for core paths).
+- MUST source core `.specify/scripts/bash/common.sh`
+  opportunistically with an inline fallback for `json_escape`
+  when the core helper is unavailable.
+- MUST locate the repo root via `find_specify_root` (or
+  equivalent walk-up) rather than assuming CWD.
+- MUST use `set -euo pipefail`.
+- Exit code 0 on success, non-zero on error.
+
+### Naming Convention
+
+- Command IDs use dot namespacing: `speckit.<bundle-id>.<name>`
+  (e.g., `speckit.trasgospec.roadmap`).
+- Dots map to hyphens at invocation: `/speckit-trasgospec-roadmap`.
+
+### Separation of Concerns
+
+- **Script**: deterministic filesystem operations, data extraction,
+  configuration resolution, JSON output. Testable in isolation.
+- **Command**: AI agent instructions for running the script, parsing
+  JSON, rendering user-facing output, handling empty/error states.
+- This separation ensures reproducibility (scripts produce the same
+  output for the same input) and testability (scripts can be tested
+  without an AI agent).
+
 ## Development Workflow
 
 - Consult Spec Kit documentation before choosing or composing
@@ -123,4 +176,4 @@ during spec and plan reviews.
   constitution compliance check. Non-compliance MUST be resolved
   before implementation proceeds.
 
-**Version**: 1.1.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-08
+**Version**: 1.2.0 | **Ratified**: 2026-08-07 | **Last Amended**: 2026-08-08
