@@ -96,7 +96,7 @@ fi
 # --- Validate bundle ---------------------------------------------------------
 
 log "Validating bundle..."
-if ! specify bundle validate --path "$REPO_ROOT/bundle" 2>&1 | while IFS= read -r line; do
+if ! specify bundle validate --path "$REPO_ROOT/bundle" --offline 2>&1 | while IFS= read -r line; do
     log "$line"
 done; then
     log "ERROR: Bundle validation failed."
