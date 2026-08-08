@@ -5,9 +5,9 @@
       "id": "trasgospec",
       "name": "Trasgo Spec Kit",
       "description": "Journey-first product specification for spec-driven development",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "role": "developer",
-      "download_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/main/trasgospec-0.4.0.zip"
+      "download_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/main/trasgospec-0.5.0.zip"
     }
   }
 }
