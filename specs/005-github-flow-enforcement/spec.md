@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-08
 
-**Status**: Draft
+**Status**: Complete
 
 **Input**: User description: "Enforce GitHub Flow branching discipline as a built-in part of trasgospec's core skills. Every spec-kit skill (specify, clarify, checklist, plan, tasks, implement, converge, analyze) gets flow-aware behavior: block execution on main branch (offer to create a feature branch derived from spec dir name like feat/NNN-slug), nudge PR creation at plan phase (draft) and implement phase (mark ready). A shared flow_context.sh script provides deterministic git state (current branch, is_main, branch age, commits behind main, PR status) as a JSON blob merged into each skill script's output. gh CLI integration is configurable via extension input gh_integration (boolean, default true) with three effective modes: gh available+enabled does full PR ops, gh missing falls back to output-only with warning, gh disabled outputs PR title/description/suggested-command only. Read-only commands (roadmap, hello) are not flow-aware."
 
