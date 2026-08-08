@@ -8,6 +8,7 @@ __pycache__/
 # Bundle artifacts
 dist/
 *.zip
+!trasgospec-*.zip
 
 # OS
 .DS_Store

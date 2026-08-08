@@ -1,0 +1,299 @@
+#!/usr/bin/env bash
+# pre-push — Validate, build, and publish bundle on push to main.
+#
+# When commits being pushed include changes to bundle/, this hook:
+#   1. Validates the bundle via `specify bundle validate`
+#   2. Builds the zip artifact via `specify bundle build`
+#   3. Updates catalog.json with version and download URL
+#   4. Creates a separate "chore: build bundle" commit
+#
+# Exit codes per contracts/hook-exit-codes.md:
+#   0 — success or skip (no bundle changes)
+#   1 — validation failed
+#   2 — build failed
+#   3 — prerequisites missing (specify CLI)
+#   4 — catalog update failed
+#   5 — auto-commit failed
+#
+# Portability: targets bash 3.2+ (macOS default).
+set -euo pipefail
+
+# --- Helpers ----------------------------------------------------------------
+
+log() { printf '[bundle-build] %s\n' "$1" >&2; }
+
+json_escape() {
+    local s="$1"
+    s="${s//\\/\\\\}"; s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"; s="${s//$'\t'/\\t}"; s="${s//$'\r'/\\r}"
+    printf '%s' "$s"
+}
+
+_find_repo_root() {
+    local d="$1"
+    while [ -n "$d" ] && [ "$d" != "/" ]; do
+        if [ -d "$d/.specify" ]; then printf '%s' "$d"; return 0; fi
+        d="$(dirname -- "$d")"
+    done
+    [ -d "/.specify" ] && { printf '/'; return 0; }
+    return 1
+}
+
+# --- Locate repo root -------------------------------------------------------
+
+REPO_ROOT="$(_find_repo_root "$PWD" || true)"
+[ -n "$REPO_ROOT" ] || REPO_ROOT="$PWD"
+
+# --- Parse stdin refs -------------------------------------------------------
+
+# Pre-push hook receives: <local ref> <local sha> <remote ref> <remote sha>
+# one line per ref being pushed.
+has_bundle_changes=false
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    # Only process pushes to main branch
+    case "$remote_ref" in
+        refs/heads/main) ;;
+        *) continue ;;
+    esac
+
+    # Handle new branch (remote_sha is all zeros)
+    zero="0000000000000000000000000000000000000000"
+    if [ "$remote_sha" = "$zero" ]; then
+        # New branch — check all commits
+        range="$local_sha"
+    else
+        range="$remote_sha..$local_sha"
+    fi
+
+    # Check if any commits in range touch bundle/
+    if git diff --name-only "$range" -- bundle/ 2>/dev/null | grep -q '^bundle/'; then
+        has_bundle_changes=true
+        break
+    fi
+done
+
+# Skip silently if no bundle changes
+if [ "$has_bundle_changes" = false ]; then
+    exit 0
+fi
+
+# --- Check prerequisites ----------------------------------------------------
+
+if ! command -v specify >/dev/null 2>&1; then
+    log "ERROR: specify CLI not found. Install Spec Kit before pushing bundle changes."
+    exit 3
+fi
+
+# --- Validate bundle ---------------------------------------------------------
+
+log "Validating bundle..."
+if ! specify bundle validate --path "$REPO_ROOT/bundle" 2>&1 | while IFS= read -r line; do
+    log "$line"
+done; then
+    log "ERROR: Bundle validation failed."
+    log "Push blocked. Fix validation errors and try again."
+    exit 1
+fi
+
+# --- Build bundle ------------------------------------------------------------
+
+log "Building bundle..."
+if ! specify bundle build --path "$REPO_ROOT/bundle" --output "$REPO_ROOT" 2>&1 | while IFS= read -r line; do
+    log "$line"
+done; then
+    log "ERROR: Bundle build failed."
+    exit 2
+fi
+
+# --- Parse bundle.yml metadata -----------------------------------------------
+
+bundle_yml="$REPO_ROOT/bundle/bundle.yml"
+if [ ! -f "$bundle_yml" ]; then
+    log "ERROR: bundle/bundle.yml not found."
+    exit 4
+fi
+
+_extract_yml_field() {
+    # Extract a simple key: value field from bundle.yml (flat structure under bundle:)
+    local file="$1" field="$2"
+    local value
+    value="$(grep -m1 "^  ${field}:" "$file" 2>/dev/null || true)"
+    if [ -n "$value" ]; then
+        # Strip key prefix, quotes, and whitespace
+        value="${value#*: }"
+        value="${value#\"}" ; value="${value%\"}"
+        value="${value#\'}" ; value="${value%\'}"
+        # Trim whitespace
+        value="$(printf '%s' "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+        printf '%s' "$value"
+    fi
+}
+
+_extract_yml_description() {
+    # Handle multiline >- description in bundle.yml
+    local file="$1"
+    local in_desc=false
+    local desc=""
+    while IFS= read -r line; do
+        if [ "$in_desc" = true ]; then
+            # Check if line is indented (continuation) or a new key
+            case "$line" in
+                "  "*)
+                    # Continuation line — but check if it's a new key (has : after first word)
+                    local trimmed
+                    trimmed="$(printf '%s' "$line" | sed 's/^[[:space:]]*//')"
+                    case "$trimmed" in
+                        *:*) break ;;  # New key, stop
+                        *) desc="$desc $trimmed" ;;
+                    esac
+                    ;;
+                *) break ;;
+            esac
+        fi
+        case "$line" in
+            *"description:"*)
+                in_desc=true
+                # Check if value is on same line (not >- or |)
+                local after="${line#*description: }"
+                case "$after" in
+                    ">-"|">"|"|"|"|-") ;;  # Block scalar, read next lines
+                    "\""*) desc="${after#\"}"; desc="${desc%\"}"; break ;;
+                    *) desc="$after"; break ;;
+                esac
+                ;;
+        esac
+    done < "$file"
+    printf '%s' "$desc" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
+bundle_id="$(_extract_yml_field "$bundle_yml" "id")"
+bundle_name="$(_extract_yml_field "$bundle_yml" "name")"
+bundle_version="$(_extract_yml_field "$bundle_yml" "version")"
+bundle_role="$(_extract_yml_field "$bundle_yml" "role")"
+bundle_description="$(_extract_yml_description "$bundle_yml")"
+
+if [ -z "$bundle_id" ] || [ -z "$bundle_version" ]; then
+    log "ERROR: Could not extract id or version from bundle.yml."
+    exit 4
+fi
+
+# --- Parse git remote URL for owner/repo ------------------------------------
+
+_parse_github_remote() {
+    local remote_url
+    remote_url="$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || true)"
+    if [ -z "$remote_url" ]; then
+        return 1
+    fi
+    # SSH: git@github.com:owner/repo.git
+    # HTTPS: https://github.com/owner/repo.git
+    local owner_repo
+    case "$remote_url" in
+        git@github.com:*)
+            owner_repo="${remote_url#git@github.com:}"
+            ;;
+        https://github.com/*)
+            owner_repo="${remote_url#https://github.com/}"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+    # Strip .git suffix
+    owner_repo="${owner_repo%.git}"
+    printf '%s' "$owner_repo"
+}
+
+owner_repo="$(_parse_github_remote || true)"
+if [ -z "$owner_repo" ]; then
+    log "ERROR: Could not parse GitHub owner/repo from git remote."
+    exit 4
+fi
+
+# --- Update catalog.json ----------------------------------------------------
+
+zip_filename="${bundle_id}-${bundle_version}.zip"
+download_url="https://raw.githubusercontent.com/${owner_repo}/refs/heads/main/${zip_filename}"
+
+catalog_file="$REPO_ROOT/catalog.json"
+
+_update_catalog() {
+    local catalog="$1"
+    local tmp_catalog="${catalog}.tmp"
+
+    if [ ! -f "$catalog" ]; then
+        # Create catalog from scratch
+        cat > "$catalog" <<CATALOG_EOF
+{
+  "schema_version": "1.0",
+  "bundles": {
+    "$(json_escape "$bundle_id")": {
+      "id": "$(json_escape "$bundle_id")",
+      "name": "$(json_escape "$bundle_name")",
+      "description": "$(json_escape "$bundle_description")",
+      "version": "$(json_escape "$bundle_version")",
+      "role": "$(json_escape "$bundle_role")",
+      "download_url": "$(json_escape "$download_url")"
+    }
+  }
+}
+CATALOG_EOF
+        return 0
+    fi
+
+    # Update existing catalog fields using sed
+    sed \
+        -e "s|\"version\": *\"[^\"]*\"|\"version\": \"$(json_escape "$bundle_version")\"|" \
+        -e "s|\"name\": *\"[^\"]*\"|\"name\": \"$(json_escape "$bundle_name")\"|" \
+        -e "s|\"description\": *\"[^\"]*\"|\"description\": \"$(json_escape "$bundle_description")\"|" \
+        -e "s|\"role\": *\"[^\"]*\"|\"role\": \"$(json_escape "$bundle_role")\"|" \
+        -e "s|\"download_url\": *\"[^\"]*\"|\"download_url\": \"$(json_escape "$download_url")\"|" \
+        "$catalog" > "$tmp_catalog"
+
+    mv "$tmp_catalog" "$catalog"
+}
+
+log "Updating catalog.json (v${bundle_version})"
+if ! _update_catalog "$catalog_file"; then
+    log "ERROR: Failed to update catalog.json"
+    exit 4
+fi
+
+# --- Auto-commit artifacts ---------------------------------------------------
+
+log "Creating build commit..."
+
+# Stash any uncommitted changes
+stash_applied=false
+if ! git -C "$REPO_ROOT" diff --quiet 2>/dev/null || \
+   ! git -C "$REPO_ROOT" diff --cached --quiet 2>/dev/null; then
+    git -C "$REPO_ROOT" stash push -q -m "bundle-build: temp stash" 2>/dev/null || true
+    stash_applied=true
+fi
+
+# Stage and commit build artifacts
+if ! git -C "$REPO_ROOT" add -f "$REPO_ROOT/$zip_filename" "$catalog_file" 2>/dev/null; then
+    log "ERROR: Failed to stage build artifacts."
+    if [ "$stash_applied" = true ]; then
+        git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
+    fi
+    exit 5
+fi
+
+if ! git -C "$REPO_ROOT" commit -q -m "chore: build bundle v${bundle_version}" 2>/dev/null; then
+    log "ERROR: Failed to create build commit."
+    if [ "$stash_applied" = true ]; then
+        git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
+    fi
+    exit 5
+fi
+
+# Restore stash if applied
+if [ "$stash_applied" = true ]; then
+    git -C "$REPO_ROOT" stash pop -q 2>/dev/null || true
+fi
+
+log "Created commit: chore: build bundle v${bundle_version}"
+log "Done."
+exit 0

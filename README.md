@@ -19,6 +19,35 @@ specify bundle catalog add https://raw.githubusercontent.com/trasgo-furioso/tras
 specify bundle install trasgospec
 ```
 
+## Development
+
+### Setup
+
+After cloning, activate the git hooks:
+
+```bash
+./scripts/setup.sh
+```
+
+This configures `git core.hooksPath` to use the tracked `.githooks/` directory, enabling the automated bundle build on push.
+
+### Bundle Build Automation
+
+A pre-push hook automatically validates and builds the bundle when you push changes to `bundle/` on main:
+
+1. Runs `specify bundle validate --path bundle`
+2. Runs `specify bundle build --path bundle --output .`
+3. Updates `catalog.json` with the current version and download URL
+4. Creates a separate `chore: build bundle vX.Y.Z` commit
+
+Pushes that don't touch `bundle/` pass through silently. Validation failures block the push.
+
+### Tests
+
+```bash
+.venv/bin/pytest tests/unit/ -v
+```
+
 ## Components
 
 - `/trasgospec` — Hello command to verify bundle install
