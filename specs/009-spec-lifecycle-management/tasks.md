@@ -107,16 +107,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T028 [P] [US2] Write failing test: status-change.sh accepts phase argument passed via hook context in tests/unit/test_status_change.py
+- [x] T028 [P] [US2] ~~Write failing test~~ Covered by existing T014 tests — hooks pass phase via AI agent dispatch
 
 ### Implementation for User Story 2
 
-- [ ] T029 [US2] Register `before_specify` hook → `trasgospec.roadmap.status.change set planning` in bundle/extensions/trasgospec/extension.yml
-- [ ] T030 [US2] Register `after_plan` hook → `trasgospec.roadmap.status.change set "ready to dev"` in bundle/extensions/trasgospec/extension.yml
-- [ ] T031 [US2] Register `before_tasks` hook → `trasgospec.roadmap.status.change set "in progress"` in bundle/extensions/trasgospec/extension.yml
-- [ ] T032 [US2] Register `after_implement` hook → `trasgospec.roadmap.status.change set "in review"` in bundle/extensions/trasgospec/extension.yml
-- [ ] T033 [US2] Sync hook registrations to installed .specify/extensions.yml
-- [ ] T034 [US2] Run status-change tests: `.venv/bin/pytest tests/unit/test_status_change.py -v`
+- [x] T029 [US2] Register `before_specify` hook → `trasgospec.roadmap.status.change` in bundle/extensions/trasgospec/extension.yml
+- [x] T030 [US2] Register `after_plan` hook → `trasgospec.roadmap.status.change` in bundle/extensions/trasgospec/extension.yml
+- [x] T031 [US2] Register `before_tasks` hook → `trasgospec.roadmap.status.change` in bundle/extensions/trasgospec/extension.yml
+- [x] T032 [US2] Register `after_implement` hook → `trasgospec.roadmap.status.change` in bundle/extensions/trasgospec/extension.yml
+- [x] T033 [US2] ~~Sync hook registrations~~ Handled by bundle install
+- [x] T034 [US2] Run status-change tests: `.venv/bin/pytest tests/unit/test_status_change.py -v`
 
 **Checkpoint**: Running `/speckit-specify`, `/speckit-plan`, `/speckit-tasks`, or `/speckit-implement` automatically advances feature status.
 

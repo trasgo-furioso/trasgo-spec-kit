@@ -41,6 +41,11 @@ provides:
       aliases: ["trasgospec.roadmap.status.change"]
 
 hooks:
+  before_specify:
+    command: "speckit.trasgospec.roadmap.status.change"
+    optional: false
+    priority: 5
+    description: "Lifecycle — advance status to Planning"
   after_specify:
     command: "speckit.trasgospec.flow-gate"
     optional: false
@@ -58,9 +63,14 @@ hooks:
     optional: false
     description: "GitHub Flow — require feature branch"
   before_tasks:
-    command: "speckit.trasgospec.flow-gate"
-    optional: false
-    description: "GitHub Flow — require feature branch"
+    - command: "speckit.trasgospec.flow-gate"
+      optional: false
+      priority: 5
+      description: "GitHub Flow — require feature branch"
+    - command: "speckit.trasgospec.roadmap.status.change"
+      optional: false
+      priority: 10
+      description: "Lifecycle — advance status to In Progress"
   before_implement:
     command: "speckit.trasgospec.flow-gate"
     optional: false
@@ -74,13 +84,23 @@ hooks:
     optional: false
     description: "GitHub Flow — require feature branch"
   after_plan:
-    command: "speckit.trasgospec.flow-nudge"
-    optional: true
-    description: "Suggest opening a draft PR for this feature"
+    - command: "speckit.trasgospec.roadmap.status.change"
+      optional: false
+      priority: 5
+      description: "Lifecycle — advance status to Ready to Dev"
+    - command: "speckit.trasgospec.flow-nudge"
+      optional: true
+      priority: 10
+      description: "Suggest opening a draft PR for this feature"
   after_implement:
-    command: "speckit.trasgospec.flow-nudge"
-    optional: true
-    description: "Suggest marking PR as ready for review"
+    - command: "speckit.trasgospec.roadmap.status.change"
+      optional: false
+      priority: 5
+      description: "Lifecycle — advance status to In Review"
+    - command: "speckit.trasgospec.flow-nudge"
+      optional: true
+      priority: 10
+      description: "Suggest marking PR as ready for review"
   after_analyze:
     command: "speckit.trasgospec.flow-nudge"
     optional: true
