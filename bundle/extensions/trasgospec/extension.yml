@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "trasgospec"
   name: "Trasgo Spec Kit"
-  version: "0.6.0"
+  version: "0.7.0"
   description: "Journey-first product specification commands for spec-driven development."
   author: "Trasgo Furioso [https://github.com/trasgo-furioso]"
   license: "MIT"
@@ -105,3 +105,16 @@ hooks:
     command: "speckit.trasgospec.flow-nudge"
     optional: true
     description: "Suggest PR is ready for final review"
+  before_discovery:
+    command: "speckit.trasgospec.flow-gate"
+    optional: false
+    description: "GitHub Flow — require feature branch"
+  after_discovery:
+    - command: "speckit.trasgospec.status"
+      optional: false
+      priority: 5
+      description: "Lifecycle — advance status to Opportunity"
+    - command: "speckit.trasgospec.flow-nudge"
+      optional: true
+      priority: 10
+      description: "Suggest next steps after discovery"
