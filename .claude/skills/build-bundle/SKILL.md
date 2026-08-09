@@ -17,7 +17,7 @@ Build and package the trasgospec bundle with all artifacts in the correct locati
 
 ## Outline
 
-1. **Parse version** from `$ARGUMENTS`. If empty, read the current version from `bundle/bundle.yml` and display it — then ask the user for the new version.
+1. **Parse version** from `$ARGUMENTS`. If empty, determine the current version by fetching the live catalog from main: `curl -s https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/refs/heads/main/catalog.json` and extracting `bundles.trasgospec.version`. Display the current version and auto-increment the minor version (e.g., `0.7.0` → `0.8.0`). Ask the user to confirm or provide a different version.
 
 2. **Detect branch** by running `git branch --show-current`.
 
