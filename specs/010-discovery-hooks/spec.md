@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: In Review
+**Status**: Delivered
 
 **Input**: User description: "Add before_discovery/after_discovery hook support to the discovery command, matching the pattern used by speckit-specify and speckit-plan. Enable other extensions to hook into discovery lifecycle. Use after_discovery to automate the Discovery → Opportunity transition."
 
