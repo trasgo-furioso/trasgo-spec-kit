@@ -26,12 +26,22 @@ EXPECTED_GATE_HOOKS = [
     "before_implement",
     "before_converge",
     "before_analyze",
+    "before_discovery",
 ]
 
 EXPECTED_NUDGE_HOOKS = [
     "after_plan",
     "after_implement",
     "after_analyze",
+    "after_discovery",
+]
+
+EXPECTED_STATUS_HOOKS = [
+    "before_specify",
+    "before_tasks",
+    "after_plan",
+    "after_implement",
+    "after_discovery",
 ]
 
 
@@ -55,6 +65,7 @@ def build_hooks_yaml() -> dict:
             "after_plan": "Suggest opening a draft PR for this feature",
             "after_implement": "Suggest marking PR as ready for review",
             "after_analyze": "Suggest PR is ready for final review",
+            "after_discovery": "Suggest next steps after discovery",
         }
         hooks[hook_point] = hooks.get(hook_point, []) + [{
             "extension": "trasgospec",
@@ -64,16 +75,32 @@ def build_hooks_yaml() -> dict:
             "enabled": True,
         }]
 
+    for hook_point in EXPECTED_STATUS_HOOKS:
+        description_map = {
+            "before_specify": "Lifecycle — advance status to Planning",
+            "before_tasks": "Lifecycle — advance status to In Progress",
+            "after_plan": "Lifecycle — advance status to Ready to Dev",
+            "after_implement": "Lifecycle — advance status to In Review",
+            "after_discovery": "Lifecycle — advance status to Opportunity",
+        }
+        hooks[hook_point] = hooks.get(hook_point, []) + [{
+            "extension": "trasgospec",
+            "command": "speckit.trasgospec.status",
+            "description": description_map[hook_point],
+            "optional": False,
+            "enabled": True,
+        }]
+
     return hooks
 
 
 class TestHookRegistrationStructure:
-    """T032: Test that all 11 hook entries are defined correctly."""
+    """Test that all 14 hook entries are defined correctly."""
 
     def test_total_hook_count(self):
         hooks = build_hooks_yaml()
         total = sum(len(v) for v in hooks.values())
-        assert total == 11, f"Expected 11 hook entries, got {total}"
+        assert total == 18, f"Expected 18 hook entries, got {total}"
 
     def test_gate_hooks_count(self):
         hooks = build_hooks_yaml()
@@ -82,7 +109,7 @@ class TestHookRegistrationStructure:
             for e in entries
             if e["command"] == "speckit.trasgospec.flow-gate"
         )
-        assert gate_count == 8, f"Expected 8 gate hooks, got {gate_count}"
+        assert gate_count == 9, f"Expected 9 gate hooks, got {gate_count}"
 
     def test_nudge_hooks_count(self):
         hooks = build_hooks_yaml()
@@ -91,7 +118,16 @@ class TestHookRegistrationStructure:
             for e in entries
             if e["command"] == "speckit.trasgospec.flow-nudge"
         )
-        assert nudge_count == 3, f"Expected 3 nudge hooks, got {nudge_count}"
+        assert nudge_count == 4, f"Expected 4 nudge hooks, got {nudge_count}"
+
+    def test_status_hooks_count(self):
+        hooks = build_hooks_yaml()
+        status_count = sum(
+            1 for entries in hooks.values()
+            for e in entries
+            if e["command"] == "speckit.trasgospec.status"
+        )
+        assert status_count == 5, f"Expected 5 status hooks, got {status_count}"
 
     def test_gate_hooks_are_mandatory(self):
         hooks = build_hooks_yaml()
@@ -123,7 +159,7 @@ class TestHookRegistrationStructure:
 
 
 class TestHookRegistrationIdempotency:
-    """T033: Test that hook registration is idempotent."""
+    """Test that hook registration is idempotent."""
 
     def test_applying_hooks_twice_produces_same_result(self):
         hooks1 = build_hooks_yaml()
@@ -146,11 +182,11 @@ class TestHookRegistrationIdempotency:
                         merged[hook_point].append(entry)
 
         total = sum(len(v) for v in merged.values())
-        assert total == 11, f"Idempotent merge should produce 11 entries, got {total}"
+        assert total == 18, f"Idempotent merge should produce 18 entries, got {total}"
 
 
 class TestHookRegistrationPreservesExisting:
-    """T034: Test that hook registration preserves existing hooks."""
+    """Test that hook registration preserves existing hooks."""
 
     def test_existing_hooks_preserved(self):
         # Simulate existing hooks from another extension
