@@ -7,7 +7,9 @@ Requires network access to raw.githubusercontent.com and the
 current branch pushed to origin.
 """
 
+import json
 import subprocess
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -30,6 +32,16 @@ EXTENSION_CATALOG_URL = (
     f"https://raw.githubusercontent.com/trasgo-furioso/"
     f"trasgo-spec-kit/{BRANCH}/extension-catalog.json"
 )
+
+# Read expected version from local bundle.yml
+_EXPECTED_VERSION = "0.6.0"
+_bundle_yml = PROJECT_ROOT / "bundle" / "bundle.yml"
+if _bundle_yml.exists():
+    for _line in _bundle_yml.read_text().splitlines():
+        _line = _line.strip()
+        if _line.startswith("version:"):
+            _EXPECTED_VERSION = _line.split(":", 1)[1].strip().strip('"').strip("'")
+            break
 
 
 def run_specify(*args, cwd):
@@ -99,6 +111,18 @@ class TestBundleInstallation:
             cwd=clean_project,
         )
         assert_command_ok(result, f"extension catalog add {EXTENSION_CATALOG_URL}")
+
+    def test_catalog_version_matches_bundle(self):
+        """Verify GitHub CDN serves the expected catalog version (not a stale cache)."""
+        with urllib.request.urlopen(BUNDLE_CATALOG_URL) as resp:
+            catalog = json.loads(resp.read())
+        served_version = catalog["bundles"]["trasgospec"]["version"]
+        assert served_version == _EXPECTED_VERSION, (
+            f"GitHub CDN is serving catalog v{served_version} but bundle.yml has v{_EXPECTED_VERSION}. "
+            f"This is likely a CDN cache issue (max-age=300s). Wait ~5 minutes and retry.\n"
+            f"  catalog URL: {BUNDLE_CATALOG_URL}\n"
+            f"  download_url: {catalog['bundles']['trasgospec']['download_url']}"
+        )
 
     def test_install_bundle(self, project_with_catalogs):
         result = run_specify("bundle", "install", "trasgospec", cwd=project_with_catalogs)
