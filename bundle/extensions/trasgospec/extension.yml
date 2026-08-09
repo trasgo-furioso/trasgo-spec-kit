@@ -35,6 +35,10 @@ provides:
       file: "commands/speckit.trasgospec.discovery.md"
       description: "Guide interactive problem exploration and produce a structured PRD."
       aliases: ["trasgospec.discovery"]
+    - name: "speckit.trasgospec.roadmap.status.change"
+      file: "commands/speckit.trasgospec.roadmap.status.change.md"
+      description: "Set, validate, or revert lifecycle status on a feature."
+      aliases: ["trasgospec.roadmap.status.change"]
 
 hooks:
   after_specify:
