@@ -21,7 +21,6 @@ No arguments. Scans the entire repository for changes.
   ],
   "deleted_files": [],
   "has_changes": true,
-  "on_branch": true,
   "branch": "011-audit-and-logs",
   "has_remote": true,
   "error": null
@@ -36,7 +35,6 @@ No arguments. Scans the entire repository for changes.
   "new_files": [],
   "deleted_files": [],
   "has_changes": false,
-  "on_branch": true,
   "branch": "011-audit-and-logs",
   "has_remote": true,
   "error": null
@@ -51,7 +49,6 @@ No arguments. Scans the entire repository for changes.
   "new_files": [],
   "deleted_files": [],
   "has_changes": false,
-  "on_branch": false,
   "branch": null,
   "has_remote": false,
   "error": "Detached HEAD — cannot commit"
@@ -68,8 +65,7 @@ No stdout output.
 - `changed_files`, `new_files`, `deleted_files` are always arrays (possibly empty)
 - Each array element has `path` (string, repo-relative) and `status` (string, git status code)
 - `has_changes` is always a boolean
-- `on_branch` is always a boolean
 - `has_remote` is always a boolean
-- `branch` is null only when `on_branch` is false
+- `branch` is null when on a detached HEAD, non-null otherwise
 - `error` is null on success, string on recoverable error
 - Files in `.specify/` are excluded from all arrays (filtered by the script since `.specify/` is gitignored)

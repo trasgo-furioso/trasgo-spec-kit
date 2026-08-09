@@ -12,7 +12,6 @@ The JSON contract emitted by `commit.sh` on stdout. Consumed by the command file
 | `new_files` | object[] | Untracked files. Each: `{"path": "<relative>", "status": "??"}` |
 | `deleted_files` | object[] | Deleted files. Each: `{"path": "<relative>", "status": "D"}` |
 | `has_changes` | boolean | `true` if any of the above arrays are non-empty |
-| `on_branch` | boolean | `true` if HEAD is on a named branch (not detached) |
 | `branch` | string \| null | Current branch name, or null if detached |
 | `has_remote` | boolean | `true` if the current branch has a remote tracking branch |
 | `error` | string \| null | Human-readable error message, or null |
@@ -63,7 +62,7 @@ Skill completes
           NO  → display "No changes to commit."
         → error set?
           → display warning, do not block
-        → on_branch=false?
+        → branch=null?
           → display "No commit created: detached HEAD"
 ```
 

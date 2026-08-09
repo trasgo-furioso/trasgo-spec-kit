@@ -35,12 +35,12 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T003 [P] Test that `commit.sh` outputs valid JSON with all required fields (`changed_files`, `new_files`, `deleted_files`, `has_changes`, `on_branch`, `branch`, `has_remote`, `error`) in `tests/unit/test_commit.py`
+- [ ] T003 [P] Test that `commit.sh` outputs valid JSON with all required fields (`changed_files`, `new_files`, `deleted_files`, `has_changes`, `branch`, `has_remote`, `error`) in `tests/unit/test_commit.py`
 - [ ] T004 [P] Test that `commit.sh` detects modified tracked files and includes them in `changed_files` with correct path and status in `tests/unit/test_commit.py`
 - [ ] T005 [P] Test that `commit.sh` detects untracked new files and includes them in `new_files` in `tests/unit/test_commit.py`
 - [ ] T006 [P] Test that `commit.sh` detects deleted files and includes them in `deleted_files` in `tests/unit/test_commit.py`
 - [ ] T007 [P] Test that `commit.sh` sets `has_changes` to `false` when no files have changed in `tests/unit/test_commit.py`
-- [ ] T008 [P] Test that `commit.sh` reports `on_branch: false` and `error` message on detached HEAD in `tests/unit/test_commit.py`
+- [ ] T008 [P] Test that `commit.sh` reports `branch: null` and `error` message on detached HEAD in `tests/unit/test_commit.py`
 - [ ] T009 [P] Test that `commit.sh` excludes `.specify/` files from all arrays (gitignored) in `tests/unit/test_commit.py`
 - [ ] T010 [P] Test that `commit.sh` reports `has_remote: true` when branch has upstream and `false` when not in `tests/unit/test_commit.py`
 
