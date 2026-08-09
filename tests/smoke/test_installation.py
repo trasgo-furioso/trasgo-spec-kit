@@ -1,7 +1,7 @@
 """Smoke tests for trasgospec bundle installation.
 
 Verifies the full user-facing installation flow:
-  git init → specify init → bundle catalog add → bundle install → verify
+  git init → specify init → catalog add → bundle install → verify
 
 Requires network access to raw.githubusercontent.com and the
 current branch pushed to origin.
@@ -22,9 +22,13 @@ _branch_result = subprocess.run(
     text=True,
 )
 BRANCH = _branch_result.stdout.strip() or "main"
-CATALOG_URL = (
+BUNDLE_CATALOG_URL = (
     f"https://raw.githubusercontent.com/trasgo-furioso/"
     f"trasgo-spec-kit/{BRANCH}/catalog.json"
+)
+EXTENSION_CATALOG_URL = (
+    f"https://raw.githubusercontent.com/trasgo-furioso/"
+    f"trasgo-spec-kit/{BRANCH}/extension-catalog.json"
 )
 
 
@@ -60,25 +64,44 @@ def clean_project(tmp_path):
 
 
 @pytest.fixture
-def project_with_bundle(clean_project):
-    """Clean project with trasgospec bundle installed."""
-    result = run_specify("bundle", "catalog", "add", CATALOG_URL, cwd=clean_project)
-    assert_command_ok(result, f"bundle catalog add {CATALOG_URL}")
-    result = run_specify("bundle", "install", "trasgospec", cwd=clean_project)
-    assert_command_ok(result, "bundle install trasgospec")
+def project_with_catalogs(clean_project):
+    """Clean project with bundle and extension catalogs added."""
+    result = run_specify("bundle", "catalog", "add", BUNDLE_CATALOG_URL, cwd=clean_project)
+    assert_command_ok(result, f"bundle catalog add {BUNDLE_CATALOG_URL}")
+    result = run_specify(
+        "extension", "catalog", "add", EXTENSION_CATALOG_URL,
+        "--name", "trasgospec", "--install-allowed",
+        cwd=clean_project,
+    )
+    assert_command_ok(result, f"extension catalog add {EXTENSION_CATALOG_URL}")
     return clean_project
+
+
+@pytest.fixture
+def project_with_bundle(project_with_catalogs):
+    """Project with trasgospec bundle installed."""
+    result = run_specify("bundle", "install", "trasgospec", cwd=project_with_catalogs)
+    assert_command_ok(result, "bundle install trasgospec")
+    return project_with_catalogs
 
 
 class TestBundleInstallation:
     """Smoke test: install trasgospec from the current branch's catalog."""
 
-    def test_add_catalog(self, clean_project):
-        result = run_specify("bundle", "catalog", "add", CATALOG_URL, cwd=clean_project)
-        assert_command_ok(result, f"bundle catalog add {CATALOG_URL}")
+    def test_add_bundle_catalog(self, clean_project):
+        result = run_specify("bundle", "catalog", "add", BUNDLE_CATALOG_URL, cwd=clean_project)
+        assert_command_ok(result, f"bundle catalog add {BUNDLE_CATALOG_URL}")
 
-    def test_install_bundle(self, clean_project):
-        run_specify("bundle", "catalog", "add", CATALOG_URL, cwd=clean_project)
-        result = run_specify("bundle", "install", "trasgospec", cwd=clean_project)
+    def test_add_extension_catalog(self, clean_project):
+        result = run_specify(
+            "extension", "catalog", "add", EXTENSION_CATALOG_URL,
+            "--name", "trasgospec", "--install-allowed",
+            cwd=clean_project,
+        )
+        assert_command_ok(result, f"extension catalog add {EXTENSION_CATALOG_URL}")
+
+    def test_install_bundle(self, project_with_catalogs):
+        result = run_specify("bundle", "install", "trasgospec", cwd=project_with_catalogs)
         assert_command_ok(result, "bundle install trasgospec")
 
     def test_bundle_list_shows_trasgospec(self, project_with_bundle):
