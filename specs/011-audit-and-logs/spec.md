@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Planning
+**Status**: Ready to Dev
 
 **Input**: User description: "specs/011-audit-and-logs/prd.md" (revised)
 

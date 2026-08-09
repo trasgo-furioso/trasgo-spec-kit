@@ -2,21 +2,19 @@
 
 ## New Hooks Added to extension.yml
 
-The audit-commit command is registered as an `after_*` hook for all artifact-producing skills. These entries are declared in the bundle's `extension.yml` and merged into the project's `.specify/extensions.yml` during `specify bundle install`.
+The commit command is registered as an `after_*` hook for all artifact-producing skills. These entries are declared in the bundle's `extension.yml` and merged into the project's `.specify/extensions.yml` during `specify bundle install`.
 
-### Hook Entries
-
-Each entry follows this structure:
+### Hook Entry Template
 
 ```yaml
 after_<phase>:
   - extension: trasgospec
-    command: speckit.trasgospec.audit-commit
+    command: speckit.trasgospec.commit
     enabled: true
     optional: false
     priority: 20
-    prompt: Execute speckit.trasgospec.audit-commit?
-    description: "Audit — auto-commit spec artifacts"
+    prompt: Execute speckit.trasgospec.commit?
+    description: "Audit — auto-commit and push"
     condition: null
 ```
 
@@ -35,8 +33,17 @@ after_<phase>:
 
 ### Priority Ordering
 
-All audit hooks use `priority: 20`, ensuring they execute after:
+All commit hooks use `priority: 20`, ensuring they execute after:
 - Status advancement hooks (priority 5)
 - Flow-nudge hooks (priority 10)
 
-This means the audit commit captures all artifact changes, including those made by earlier hooks.
+This means the commit captures all changes, including those made by earlier hooks.
+
+### New Command Registration
+
+```yaml
+- name: "speckit.trasgospec.commit"
+  file: "commands/speckit.trasgospec.commit.md"
+  description: "Auto-commit and push repository changes with structured messages."
+  aliases: ["trasgospec.commit"]
+```
