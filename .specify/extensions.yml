@@ -4,6 +4,15 @@ settings:
   auto_execute_hooks: true
   gh_integration: true
 hooks:
+  before_specify:
+  - extension: trasgospec
+    command: speckit.trasgospec.status
+    enabled: true
+    optional: false
+    priority: 5
+    prompt: Execute speckit.trasgospec.status?
+    description: Lifecycle — advance status to Planning
+    condition: null
   after_specify:
   - extension: trasgospec
     command: speckit.trasgospec.flow-gate
@@ -45,9 +54,17 @@ hooks:
     command: speckit.trasgospec.flow-gate
     enabled: true
     optional: false
-    priority: 10
+    priority: 5
     prompt: Execute speckit.trasgospec.flow-gate?
     description: GitHub Flow — require feature branch
+    condition: null
+  - extension: trasgospec
+    command: speckit.trasgospec.status
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Execute speckit.trasgospec.status?
+    description: Lifecycle — advance status to In Progress
     condition: null
   before_implement:
   - extension: trasgospec
@@ -78,6 +95,14 @@ hooks:
     condition: null
   after_plan:
   - extension: trasgospec
+    command: speckit.trasgospec.status
+    enabled: true
+    optional: false
+    priority: 5
+    prompt: Execute speckit.trasgospec.status?
+    description: Lifecycle — advance status to Ready to Dev
+    condition: null
+  - extension: trasgospec
     command: speckit.trasgospec.flow-nudge
     enabled: true
     optional: true
@@ -86,6 +111,14 @@ hooks:
     description: Suggest opening a draft PR for this feature
     condition: null
   after_implement:
+  - extension: trasgospec
+    command: speckit.trasgospec.status
+    enabled: true
+    optional: false
+    priority: 5
+    prompt: Execute speckit.trasgospec.status?
+    description: Lifecycle — advance status to In Review
+    condition: null
   - extension: trasgospec
     command: speckit.trasgospec.flow-nudge
     enabled: true
