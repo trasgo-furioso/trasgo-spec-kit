@@ -31,5 +31,5 @@
 
 ## Notes
 
-- All items pass. Spec is ready for `/speckit-clarify` or `/speckit-plan`.
-- PRD was used as primary input — all discovery decisions (commit granularity, message format, hook mechanism) are encoded in the spec.
+- All items pass. Spec revised to reflect broader scope: repo-wide commit command with full git cycle (detect → decide → stage → commit → push).
+- PRD revised during second discovery session — command renamed to `speckit.trasgospec.commit`, `.specify/` gitignored.

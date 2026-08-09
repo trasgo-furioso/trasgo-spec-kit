@@ -4,116 +4,132 @@
 
 **Created**: 2026-08-09
 
-**Status**: Opportunity
+**Status**: Planning
 
-**Input**: User description: "specs/011-audit-and-logs/prd.md"
+**Input**: User description: "specs/011-audit-and-logs/prd.md" (revised)
 
 ## Problem Statement
 
-**Pain Point**: Spec artifacts (prd.md, spec.md, plan.md, tasks.md) are created and modified during workflow sessions but never automatically committed. Untracked files are silently lost when switching branches — as experienced during the 009/010 branch setup where spec files had to be recreated multiple times. There is no structured commit trail that records who changed what, when, and why for each artifact, making it impossible to audit the evolution of a feature's documentation.
+**Pain Point**: Files created or modified during workflow sessions — spec artifacts, implementation code, tests, documentation — are not automatically committed. Untracked files are lost when switching branches, as experienced during the 009/010 branch setup where spec files had to be recreated multiple times. There is no structured commit trail that records who changed what, when, and why — making it impossible to audit the evolution of a project's artifacts.
 
-**Who**: Developers and AI agents using trasgospec for spec-driven development. Both human users who switch branches mid-session and autonomous agents that modify artifacts as part of workflow execution.
+**Who**: Developers and AI agents using trasgospec for spec-driven development. Both human users who switch branches mid-session and autonomous agents that modify files as part of workflow execution.
 
-**Current Alternatives**: Manual `git commit` after each artifact change. This is easily forgotten during interactive sessions where multiple artifacts are created or updated in rapid succession. When forgotten, untracked files are lost on branch switches with no recovery path.
+**Current Alternatives**: Manual `git commit` after each change. This is easily forgotten during interactive sessions where multiple files are created or updated in rapid succession. When forgotten, untracked files are lost on branch switches with no recovery path.
 
-**Desired Outcome**: Every skill invocation that modifies spec artifacts triggers an automatic git commit with a structured, grep-filterable message. The commit history becomes the audit log — users can run `git log --grep='[speckit:audit]'` to reconstruct the full lifecycle of any artifact.
-
-## Clarifications
-
-### Session 2026-08-09
-
-- Q: Should the audit hook commit all new/modified files in the spec directory, or only files changed during the current skill invocation? → A: Commit all new/modified files in the spec directory (no baseline tracking needed)
-- Q: How should the audit hook generate the one-liner description for each changed file in the commit message? → A: The hook command (AI) inspects the diff or file content to generate a brief meaningful description
-- Q: What priority should the audit hook have relative to existing after_* hooks? → A: Run last (priority 20) — commit after all other hooks finish modifying artifacts
+**Desired Outcome**: A reusable commit command (`speckit.trasgospec.commit`) that performs the full git cycle — detect changes, decide what to include, stage, commit with a structured message, and push. Hooked on `after_*` for every artifact-producing skill, the commit history becomes the audit log. Users can audit who did what and why by reading `git log`.
 
 ## User Scenarios & Testing
 
-### User Story 1 - Automatic Commit After Skill Execution (Priority: P1)
+### User Story 1 - Automatic Commit and Push After Skill Execution (Priority: P1)
 
-A developer runs a spec-driven skill (e.g., `/speckit-specify`, `/speckit-plan`, `/speckit-discovery`) that creates or modifies artifacts in the feature's spec directory. After the skill completes, an `after_*` hook automatically detects all new and modified files in the spec directory, stages them, and commits them with a structured message. The developer sees a brief confirmation showing which files were committed.
+A developer runs a spec-driven skill (e.g., `/speckit-specify`, `/speckit-plan`) that creates or modifies files anywhere in the repository. After the skill completes, an `after_*` hook triggers the commit command. The command gathers all changed and new files repo-wide, uses AI judgment to decide what to include, stages appropriate files, commits with a structured message, and pushes to the remote. The developer sees a brief confirmation showing which files were committed.
 
-**Why this priority**: This is the core value proposition — preventing artifact loss and creating an audit trail. Without this, all other stories are moot.
+**Why this priority**: This is the core value proposition — preventing file loss, creating an audit trail, and keeping the remote in sync. Without this, all other stories are moot.
 
-**Independent Test**: Run `/speckit-specify` on a test feature, verify that a git commit is automatically created containing the spec artifacts, with the correct message format.
+**Independent Test**: Run `/speckit-specify` on a test feature, verify that a git commit is automatically created containing the changed files with the correct message format, and that the commit is pushed.
 
 **Acceptance Scenarios**:
 
-1. **Given** a skill has just finished and modified `spec.md` in the spec directory, **When** the `after_specify` hook fires, **Then** the hook stages `spec.md`, commits with a message listing `spec.md - <description>` followed by `[speckit:audit]`, and displays `Committed: spec.md - <description> [speckit:audit]`
-2. **Given** a skill has just finished and created two new files (`research.md`, `data-model.md`), **When** the `after_plan` hook fires, **Then** both files are staged and committed in a single commit with each file listed on its own line, followed by `[speckit:audit]`
-3. **Given** a skill has just finished but made no changes to any artifacts in the spec directory, **When** the `after_*` hook fires, **Then** no commit is created and the hook displays `No artifact changes to commit.`
+1. **Given** a skill has just finished and modified files in the repository, **When** the commit command fires, **Then** the command detects all changed/new files, stages them, commits with a message listing each file with its repo-relative path and a one-liner description, and pushes to the remote
+2. **Given** a skill has just finished and created multiple new files across different directories, **When** the commit command fires, **Then** all new files are included in a single commit with each listed on its own line
+3. **Given** a skill has just finished but made no changes to any files, **When** the commit command fires, **Then** no commit is created and the command displays `No changes to commit.`
+4. **Given** the command detects files it is unsure about (unrelated changes, binaries, potential secrets), **When** deciding what to include, **Then** the command asks the user before including those files
 
 ---
 
-### User Story 2 - Grep-Filterable Audit Trail (Priority: P2)
+### User Story 2 - Readable Audit Trail via git log (Priority: P2)
 
-A developer needs to understand how a feature's spec evolved over time. They run `git log --grep='[speckit:audit]'` and see a chronological list of all automatic commits, each showing which files changed and which skill produced the change. They can further narrow by file path with `git log --grep='[speckit:audit]' -- specs/011-audit-and-logs/`.
+A developer needs to understand how a project evolved. They run `git log` and see structured commit messages where each line identifies a file (by full repo-relative path) and a brief description of the change. The format is distinctive enough to identify automated commits without needing a special tag.
 
-**Why this priority**: The audit trail is the primary user-facing output of this feature. If commits exist but aren't filterable or readable, the feature fails its stated goal.
+**Why this priority**: The audit trail is the primary user-facing output. If commits exist but aren't readable or parseable, the feature fails its stated goal.
 
-**Independent Test**: After several skill invocations, run `git log --grep='[speckit:audit]'` and verify all automatic commits appear with correct, parseable message format.
+**Independent Test**: After several skill invocations, run `git log` and verify all automated commits follow the `<path> - <description>` format.
 
 **Acceptance Scenarios**:
 
-1. **Given** multiple skills have run and produced automatic commits, **When** the user runs `git log --grep='[speckit:audit]'`, **Then** all audit commits appear and no non-audit commits are included
-2. **Given** a commit message with the format `spec.md - created feature specification\n[speckit:audit]`, **When** the user reads the log, **Then** each line before `[speckit:audit]` identifies a file and a human-readable description of the change
+1. **Given** multiple skills have run and produced automated commits, **When** the user reads `git log`, **Then** each automated commit message contains one or more lines matching `<repo-relative-path> - <description>`
+2. **Given** a commit message with multiple file entries, **When** the user reads the log, **Then** each line identifies the file's full path from the repo root and a human-readable description of what changed
 
 ---
 
-### User Story 3 - Hook Registration in extensions.yml (Priority: P3)
+### User Story 3 - Hook Registration (Priority: P3)
 
-A developer installs the trasgospec bundle, which registers `after_*` hooks in `.specify/extensions.yml` for all artifact-producing skills. The hooks point to the audit commit command with priority 20 (runs after all other hooks). The developer does not need to manually configure anything — the hooks are part of the bundle's extension manifest.
+The trasgospec bundle registers `after_*` hooks for all artifact-producing skills, each pointing to the commit command. The developer does not need to manually configure anything — the hooks are part of the bundle's extension manifest.
 
-**Why this priority**: Without hook registration, the automatic commit mechanism has no trigger. This is infrastructure that enables P1, but is lower priority because it's a one-time setup concern.
+**Why this priority**: Without hook registration, the commit command has no automatic trigger. This is infrastructure that enables P1, but is lower priority because it's a one-time setup concern.
 
-**Independent Test**: Install the bundle and verify that `extensions.yml` contains `after_*` entries for discovery, specify, clarify, plan, tasks, implement, and converge hooks pointing to the audit commit command.
+**Independent Test**: Install the bundle and verify that the extension manifest contains `after_*` entries for discovery, specify, clarify, plan, tasks, implement, and converge hooks.
 
 **Acceptance Scenarios**:
 
-1. **Given** the trasgospec bundle is installed, **When** the user inspects `.specify/extensions.yml`, **Then** `after_*` hook entries exist for each artifact-producing skill, each pointing to the audit commit command with `optional: false` and `priority: 20`
-2. **Given** an `after_*` hook is registered for a skill that does not modify artifacts (e.g., `analyze`), **When** that skill runs, **Then** the hook fires but correctly reports `No artifact changes to commit.`
+1. **Given** the trasgospec bundle is installed, **When** the user inspects the extension manifest, **Then** `after_*` hook entries exist for each artifact-producing skill, each pointing to the commit command with `optional: false` and `priority: 20`
+2. **Given** an `after_*` hook fires for a skill that did not modify any files, **When** the commit command runs, **Then** it reports `No changes to commit.` without error
+
+---
+
+### User Story 4 - Gitignore .specify Directory (Priority: P1)
+
+The `.specify/` directory is user-environment state managed by Spec Kit. It should be gitignored so that per-user configuration (feature.json, extensions.yml, installed extensions) does not pollute the repository or cause merge conflicts.
+
+**Why this priority**: This is a prerequisite for the commit command to work correctly — without it, every commit would include `.specify/` changes, creating noise and merge conflicts.
+
+**Independent Test**: Create a project with `.specify/` directory and verify it is excluded from `git status` output.
+
+**Acceptance Scenarios**:
+
+1. **Given** a project with a `.gitignore` that includes `.specify/`, **When** files inside `.specify/` are modified, **Then** `git status` does not list them as changed or untracked
+2. **Given** an existing project without `.specify/` in `.gitignore`, **When** the bundle is installed or updated, **Then** the documentation instructs the user to add `.specify/` to `.gitignore`
 
 ---
 
 ### Edge Cases
 
-- What happens when the spec directory has uncommitted changes from outside a skill (e.g., manual edits)? The hook commits all new/modified files in the spec directory — it does not distinguish between skill-produced and pre-existing changes.
-- What happens when `git commit` fails (e.g., due to a pre-commit hook failure or lock file)? The hook should display the git error and warn the user that artifacts were not committed, without blocking the skill's completion.
-- What happens when the user is on a detached HEAD? The hook should warn that no commit was created because no branch is checked out.
-- What happens when the spec directory does not exist (e.g., skill invoked without a feature context)? The hook should skip silently.
+- What happens when the repository has uncommitted changes from outside a skill (e.g., manual edits)? The command includes all repo-wide changes — it does not distinguish between skill-produced and pre-existing changes. The AI uses judgment and asks the user when unsure.
+- What happens when `git commit` fails (e.g., due to a pre-commit hook failure or lock file)? The command displays the git error and warns the user, without blocking the preceding skill's completion.
+- What happens when the user is on a detached HEAD? The command warns that no commit was created because no branch is checked out.
+- What happens when `git push` fails (e.g., remote rejection, branch protection, conflicts)? The command warns and leaves the commit in place for the user to resolve manually.
+- What happens when changed files include potential secrets (.env, credentials)? The command flags them and asks the user before including.
 
 ## Requirements
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide an `after_*` hook command that detects new and modified files in the current feature's spec directory after a skill completes
-- **FR-002**: System MUST stage all detected new and modified files within the spec directory and create a single git commit per skill invocation
-- **FR-003**: Commit messages MUST follow the format: one line per changed file (`<filename> - <description>`), ending with `[speckit:audit]` on its own line. The description is generated by the hook command (AI) by inspecting the diff or file content.
-- **FR-004**: System MUST display a brief confirmation after a successful commit listing the committed files
-- **FR-005**: System MUST display `No artifact changes to commit.` when no files in the spec directory changed
-- **FR-006**: System MUST register `after_*` hooks in `extensions.yml` for all artifact-producing skills: discovery, specify, clarify, checklist, plan, tasks, implement, and converge, with `priority: 20` (runs after all other hooks)
-- **FR-007**: System MUST gracefully handle git errors (commit failures, detached HEAD, missing spec directory) without blocking the preceding skill's completion
-- **FR-008**: System MUST use the commit author from the user's git configuration (no override)
+- **FR-001**: System MUST provide a commit command (`speckit.trasgospec.commit`) that detects all new and modified files in the repository
+- **FR-002**: System MUST use AI judgment to decide which files to include in the commit, asking the user when unsure about unrelated changes, binaries, or potential secrets
+- **FR-003**: System MUST stage selected files, commit with a structured message, and push to the remote in a single invocation
+- **FR-004**: Commit messages MUST follow the format: one line per file with `<repo-relative-path> - <description>`. No tags, headers, or footers.
+- **FR-005**: System MUST display a brief confirmation after a successful commit and push
+- **FR-006**: System MUST display `No changes to commit.` when no files have changed
+- **FR-007**: System MUST register `after_*` hooks for all artifact-producing skills: discovery, specify, clarify, checklist, plan, tasks, implement, and converge, with `priority: 20`
+- **FR-008**: System MUST gracefully handle git errors (commit failures, detached HEAD, push failures) without blocking the preceding skill's completion
+- **FR-009**: System MUST use the commit author from the user's git configuration
+- **FR-010**: The `.specify/` directory MUST be documented as gitignored — it is user-environment state, not project source
 
 ### Key Entities
 
-- **Audit Commit**: A git commit created by the hook, containing one or more artifact changes from a single skill invocation, with a structured `[speckit:audit]`-tagged message
-- **Spec Directory**: The feature's directory under `specs/` containing all artifacts (prd.md, spec.md, plan.md, tasks.md, checklists/, etc.)
-- **Hook Registration**: An entry in `.specify/extensions.yml` under `after_*` keys that triggers the audit commit command with `priority: 20`
+- **Commit Command**: The `speckit.trasgospec.commit` extension command following the two-part pattern (command file + script file)
+- **Commit Message**: A structured multi-line message where each line is `<repo-relative-path> - <description>`
+- **Hook Registration**: An entry in the extension manifest under `after_*` keys that triggers the commit command with `priority: 20`
 
 ## Success Criteria
 
 ### Measurable Outcomes
 
-- **SC-001**: 100% of artifact-producing skill invocations result in an automatic commit or a `No artifact changes to commit.` message — no silent failures
-- **SC-002**: Users can retrieve the complete change history of any spec artifact using `git log --grep='[speckit:audit]' -- <artifact-path>`
-- **SC-003**: Zero manual git commits are required to preserve spec artifacts during normal workflow usage
-- **SC-004**: Each audit commit message is parseable — every line before `[speckit:audit]` matches the pattern `<filename> - <description>`
+- **SC-001**: 100% of artifact-producing skill invocations result in an automatic commit or a `No changes to commit.` message — no silent failures
+- **SC-002**: Users can reconstruct the full change history of any file by reading `git log -- <file-path>`
+- **SC-003**: Zero manual git commits are required to preserve work during normal workflow usage
+- **SC-004**: Each automated commit message is human-readable — every line matches `<path> - <description>`
+- **SC-005**: All automated commits are pushed to the remote within the same command invocation (unless push fails, in which case a warning is shown)
 
 ## Assumptions
 
 - Git is always available and initialized in trasgospec projects (the bundle requires a git repository)
-- The hook follows the two-part extension pattern: a command file with AI instructions and a script file with deterministic logic
-- The script detects changes by listing all new and modified files in the spec directory at hook execution time (no baseline snapshot needed)
-- The hook command (AI) generates meaningful one-liner descriptions by inspecting the diff or file content for each changed file
-- Pre-existing uncommitted changes outside the spec directory are not touched by the hook
-- The audit hook runs with priority 20, ensuring it executes after all other `after_*` hooks (status advancement, flow-nudge, etc.) have finished
+- `.specify/` directory is gitignored — it is user-environment state managed by Spec Kit, not project source
+- The command follows the two-part extension pattern: a command file (AI instructions) and a script file (deterministic git status/diff gathering)
+- Commits are batched per skill invocation (one commit per skill run)
+- The command is repo-wide — it considers all changed/new files, not scoped to the spec directory
+- The AI decides what to include based on judgment; when unsure, it asks the user
+- The full git cycle is: detect → decide → stage → commit → push
+- If push fails, the command warns and leaves the commit in place
+- The commit author reflects who or what made the change (human user's git config or agent identity)
+- The hook runs with priority 20, ensuring it executes after all other `after_*` hooks
