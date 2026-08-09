@@ -18,8 +18,8 @@
 
 **Purpose**: Project initialization — gitignore and test infrastructure
 
-- [ ] T001 Add `.specify/` to `.gitignore` and remove `.specify/` from git tracking
-- [ ] T002 [P] Create test helper `run_commit_sh()` in `tests/unit/test_commit.py` that runs `commit.sh` against a `tmp_path` git repo
+- [x] T001 Add `.specify/` to `.gitignore` and remove `.specify/` from git tracking
+- [x] T002 [P] Create test helper `run_commit_sh()` in `tests/unit/test_commit.py` that runs `commit.sh` against a `tmp_path` git repo
 
 **Checkpoint**: `.specify/` is gitignored, test infrastructure ready
 
@@ -35,19 +35,19 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T003 [P] Test that `commit.sh` outputs valid JSON with all required fields (`changed_files`, `new_files`, `deleted_files`, `has_changes`, `branch`, `has_remote`, `error`) in `tests/unit/test_commit.py`
-- [ ] T004 [P] Test that `commit.sh` detects modified tracked files and includes them in `changed_files` with correct path and status in `tests/unit/test_commit.py`
-- [ ] T005 [P] Test that `commit.sh` detects untracked new files and includes them in `new_files` in `tests/unit/test_commit.py`
-- [ ] T006 [P] Test that `commit.sh` detects deleted files and includes them in `deleted_files` in `tests/unit/test_commit.py`
-- [ ] T007 [P] Test that `commit.sh` sets `has_changes` to `false` when no files have changed in `tests/unit/test_commit.py`
-- [ ] T008 [P] Test that `commit.sh` reports `branch: null` and `error` message on detached HEAD in `tests/unit/test_commit.py`
-- [ ] T009 [P] Test that `commit.sh` excludes `.specify/` files from all arrays (gitignored) in `tests/unit/test_commit.py`
-- [ ] T010 [P] Test that `commit.sh` reports `has_remote: true` when branch has upstream and `false` when not in `tests/unit/test_commit.py`
+- [x] T003 [P] Test that `commit.sh` outputs valid JSON with all required fields (`changed_files`, `new_files`, `deleted_files`, `has_changes`, `branch`, `has_remote`, `error`) in `tests/unit/test_commit.py`
+- [x] T004 [P] Test that `commit.sh` detects modified tracked files and includes them in `changed_files` with correct path and status in `tests/unit/test_commit.py`
+- [x] T005 [P] Test that `commit.sh` detects untracked new files and includes them in `new_files` in `tests/unit/test_commit.py`
+- [x] T006 [P] Test that `commit.sh` detects deleted files and includes them in `deleted_files` in `tests/unit/test_commit.py`
+- [x] T007 [P] Test that `commit.sh` sets `has_changes` to `false` when no files have changed in `tests/unit/test_commit.py`
+- [x] T008 [P] Test that `commit.sh` reports `branch: null` and `error` message on detached HEAD in `tests/unit/test_commit.py`
+- [x] T009 [P] Test that `commit.sh` excludes `.specify/` files from all arrays (gitignored) in `tests/unit/test_commit.py`
+- [x] T010 [P] Test that `commit.sh` reports `has_remote: true` when branch has upstream and `false` when not in `tests/unit/test_commit.py`
 
 ### Implementation
 
-- [ ] T011 Implement `commit.sh` in `bundle/extensions/trasgospec/scripts/bash/commit.sh` per the JSON contract in `contracts/commit-script-json.md` — use `git status --porcelain` repo-wide, parse output into `changed_files`/`new_files`/`deleted_files`, check branch state with `git rev-parse`, check remote with `git config --get branch.<name>.remote`
-- [ ] T012 Run all commit.sh tests (T003–T010) and verify they pass in `tests/unit/test_commit.py`
+- [x] T011 Implement `commit.sh` in `bundle/extensions/trasgospec/scripts/bash/commit.sh` per the JSON contract in `contracts/commit-script-json.md` — use `git status --porcelain` repo-wide, parse output into `changed_files`/`new_files`/`deleted_files`, check branch state with `git rev-parse`, check remote with `git config --get branch.<name>.remote`
+- [x] T012 Run all commit.sh tests (T003–T010) and verify they pass in `tests/unit/test_commit.py`
 
 **Checkpoint**: `commit.sh` produces correct JSON for all scenarios
 
@@ -63,13 +63,13 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T013 [P] [US1] Test that the command file frontmatter declares `scripts.sh` pointing to `scripts/bash/commit.sh` in `tests/unit/test_commit.py`
-- [ ] T014 [P] [US1] Integration test: after creating files in a test repo, the commit command creates a commit with the `<path> - <description>` message format in `tests/integration/test_commit_integration.py`
+- [x] T013 [P] [US1] Test that the command file frontmatter declares `scripts.sh` pointing to `scripts/bash/commit.sh` in `tests/unit/test_commit.py`
+- [x] T014 [P] [US1] Integration test: after creating files in a test repo, the commit command creates a commit with the `<path> - <description>` message format in `tests/integration/test_commit_integration.py`
 
 ### Implementation for US1
 
-- [ ] T015 [US1] Create command file `bundle/extensions/trasgospec/commands/speckit.trasgospec.commit.md` with YAML frontmatter (`description`, `scripts.sh`) and AI instructions for: running the script, inspecting diffs to generate descriptions, deciding what to include (asking user when unsure about secrets/binaries/unrelated files), staging with `git add`, committing with structured message, pushing with `git push`, handling errors gracefully
-- [ ] T016 [US1] Register the commit command in `bundle/extensions/trasgospec/extension.yml` under `provides.commands` with name `speckit.trasgospec.commit`, aliases `["trasgospec.commit"]`
+- [x] T015 [US1] Create command file `bundle/extensions/trasgospec/commands/speckit.trasgospec.commit.md` with YAML frontmatter (`description`, `scripts.sh`) and AI instructions for: running the script, inspecting diffs to generate descriptions, deciding what to include (asking user when unsure about secrets/binaries/unrelated files), staging with `git add`, committing with structured message, pushing with `git push`, handling errors gracefully
+- [x] T016 [US1] Register the commit command in `bundle/extensions/trasgospec/extension.yml` under `provides.commands` with name `speckit.trasgospec.commit`, aliases `["trasgospec.commit"]`
 
 **Checkpoint**: The commit command can be invoked manually and performs the full git cycle
 
@@ -83,7 +83,7 @@
 
 ### Implementation for US2
 
-- [ ] T017 [US2] Add commit message format examples and validation rules to the command file instructions in `bundle/extensions/trasgospec/commands/speckit.trasgospec.commit.md` — ensure the AI generates descriptions by inspecting diffs (for modified files) or file content (for new files), keeps descriptions under 80 chars, uses full repo-relative paths, and produces no tags/headers/footers
+- [x] T017 [US2] Add commit message format examples and validation rules to the command file instructions in `bundle/extensions/trasgospec/commands/speckit.trasgospec.commit.md` — ensure the AI generates descriptions by inspecting diffs (for modified files) or file content (for new files), keeps descriptions under 80 chars, uses full repo-relative paths, and produces no tags/headers/footers
 
 **Checkpoint**: Commit messages are consistently formatted and readable in `git log`
 
@@ -97,11 +97,11 @@
 
 ### Tests for US3
 
-- [ ] T018 [US3] Test that `extension.yml` contains `after_*` hook entries for all 8 phases (discovery, specify, clarify, checklist, plan, tasks, implement, converge) pointing to `speckit.trasgospec.commit` with `priority: 20` in `tests/unit/test_commit.py`
+- [x] T018 [US3] Test that `extension.yml` contains `after_*` hook entries for all 8 phases (discovery, specify, clarify, checklist, plan, tasks, implement, converge) pointing to `speckit.trasgospec.commit` with `priority: 20` in `tests/unit/test_commit.py`
 
 ### Implementation for US3
 
-- [ ] T019 [US3] Add `after_*` hook declarations to `bundle/extensions/trasgospec/extension.yml` for all 8 artifact-producing skills: `after_discovery`, `after_specify`, `after_clarify`, `after_checklist`, `after_plan`, `after_tasks`, `after_implement`, `after_converge` — each with `command: speckit.trasgospec.commit`, `optional: false`, `priority: 20`, `description: "Audit — auto-commit and push"`
+- [x] T019 [US3] Add `after_*` hook declarations to `bundle/extensions/trasgospec/extension.yml` for all 8 artifact-producing skills: `after_discovery`, `after_specify`, `after_clarify`, `after_checklist`, `after_plan`, `after_tasks`, `after_implement`, `after_converge` — each with `command: speckit.trasgospec.commit`, `optional: false`, `priority: 20`, `description: "Audit — auto-commit and push"`
 
 **Checkpoint**: Hook entries registered for all artifact-producing skills
 
@@ -111,9 +111,9 @@
 
 **Purpose**: Final validation and cleanup
 
-- [ ] T020 Run `specify bundle validate --path bundle --offline` to verify the bundle manifest is valid with the new command and hooks
-- [ ] T021 Run quickstart.md validation scenarios to verify end-to-end behavior
-- [ ] T022 Run full test suite `.venv/bin/pytest tests/ -v` to verify no regressions
+- [x] T020 Run `specify bundle validate --path bundle --offline` to verify the bundle manifest is valid with the new command and hooks
+- [x] T021 Run quickstart.md validation scenarios to verify end-to-end behavior
+- [x] T022 Run full test suite `.venv/bin/pytest tests/ -v` to verify no regressions
 
 ---
 

@@ -9,9 +9,8 @@ __pycache__/
 dist/
 bundle/*.zip
 
-# Spec Kit installed extensions and cache (generated on `specify bundle install`)
-.specify/extensions/
-.specify/bundle-records.json
+# Spec Kit user-environment state (managed by Spec Kit per-user, not project source)
+.specify/
 
 # Auto-generated skill files from installed extensions
 .claude/skills/speckit-trasgospec-*/
