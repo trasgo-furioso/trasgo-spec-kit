@@ -40,7 +40,7 @@ _TEST_BUNDLE_CATALOG = {
         "trasgospec": {
             "id": "trasgospec",
             "name": "Trasgo Spec Kit",
-            "description": "Scaffold Spec Kit bundle for the claude integration",
+            "description": "Journey-first product specification for spec-driven development",
             "version": _BUNDLE_VERSION,
             "role": "developer",
             "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-{_BUNDLE_VERSION}.zip",
@@ -62,7 +62,7 @@ _TEST_EXTENSION_CATALOG = {
             "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-extension-{_BUNDLE_VERSION}.zip",
             "license": "MIT",
             "category": "utility",
-            "effect": "read-only",
+            "effect": "read-write",
             "requires": {"speckit_version": ">=0.15.0"},
             "provides": {"commands": _COMMAND_COUNT},
             "tags": ["specification"],
@@ -183,6 +183,23 @@ def project_with_extension_catalog(clean_project, extension_catalog_url):
         text=True,
     )
     assert result.returncode == 0, f"extension catalog add failed: {result.stderr}"
+    return clean_project
+
+
+@pytest.fixture
+def project_with_dev_extension(clean_project):
+    """Clean project with trasgospec extension installed from local source via --dev."""
+    result = subprocess.run(
+        ["specify", "extension", "add", str(EXTENSION_DIR), "--dev"],
+        cwd=clean_project,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, (
+        f"extension add --dev failed (exit {result.returncode})\n"
+        f"  stdout: {result.stdout.strip()}\n"
+        f"  stderr: {result.stderr.strip()}"
+    )
     return clean_project
 
 

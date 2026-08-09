@@ -10,6 +10,16 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BUNDLE_ROOT = PROJECT_ROOT / "bundle"
 
+# Read version dynamically from bundle.yml
+_BUNDLE_VERSION = "0.6.0"
+_bundle_yml = BUNDLE_ROOT / "bundle.yml"
+if _bundle_yml.exists():
+    for _line in _bundle_yml.read_text().splitlines():
+        _line = _line.strip()
+        if _line.startswith("version:"):
+            _BUNDLE_VERSION = _line.split(":", 1)[1].strip().strip('"').strip("'")
+            break
+
 
 def run_specify(*args, cwd):
     """Run a specify CLI command and return the result."""
@@ -55,7 +65,6 @@ class TestBundleListAfterInstall:
         # Assert
         assert result.returncode == 0
         assert "trasgospec" in result.stdout
-        from tests.integration.conftest import _BUNDLE_VERSION
         assert _BUNDLE_VERSION in result.stdout
 
 
@@ -108,7 +117,6 @@ class TestInstallFromLocalPath:
 
         # Assert
         assert "trasgospec" in result.stdout
-        from tests.integration.conftest import _BUNDLE_VERSION
         assert _BUNDLE_VERSION in result.stdout
 
     def test_local_path_install_delivers_components(self, project_with_extension_catalog):

@@ -15,6 +15,9 @@ bundle/*.zip
 # Auto-generated skill files from installed extensions
 .claude/skills/speckit-*/
 
+# Spec Kit source (reference only)
+speckit-code/
+
 # OS
 .DS_Store
 Thumbs.db

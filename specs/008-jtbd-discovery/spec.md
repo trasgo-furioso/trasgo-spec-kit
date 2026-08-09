@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-08
 
-**Status**: Draft
+**Status**: Delivered
 
 **Input**: PRD from `specs/008-jtbd-discovery/prd.md` — Replace "User Stories Overview" with "Jobs to Be Done" in the trasgospec-discovery command. The discovery conversation should stay in problem space using the job story format ("When [situation], I want to [motivation], so I can [outcome]"). Translation from JTBD to user stories is delegated to `/speckit-specify` when the PRD is passed as feature context.
 
