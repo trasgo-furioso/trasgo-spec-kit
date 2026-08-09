@@ -118,6 +118,7 @@ cat > "$PRD_PATH" <<SCAFFOLD
 
 **Created**: ${TODAY}
 **Discovery Session**: ${TODAY}
+**Status**: Discovery
 
 ## Problem Statement
 

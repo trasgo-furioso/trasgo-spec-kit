@@ -20,7 +20,7 @@
 
 **Purpose**: No new project structure needed — this feature extends existing scripts and adds one new extension command.
 
-- [ ] T001 Verify existing test infrastructure works: `.venv/bin/pytest tests/unit/test_scan_specs.py -v`
+- [x] T001 Verify existing test infrastructure works: `.venv/bin/pytest tests/unit/test_scan_specs.py -v`
 
 ---
 
@@ -30,9 +30,9 @@
 
 **⚠️ CRITICAL**: US1 (roadmap visibility) and US3 (manual status command) both depend on this.
 
-- [ ] T002 Write failing test: discovery.sh writes `**Status**: Discovery` in prd.md scaffold in tests/unit/test_discovery.py
-- [ ] T003 Update discovery.sh to include `**Status**: Discovery` in the prd.md template at bundle/extensions/trasgospec/scripts/bash/discovery.sh
-- [ ] T004 Sync installed copy at .specify/extensions/trasgospec/scripts/bash/discovery.sh
+- [x] T002 Write failing test: discovery.sh writes `**Status**: Discovery` in prd.md scaffold in tests/unit/test_discovery.py
+- [x] T003 Update discovery.sh to include `**Status**: Discovery` in the prd.md template at bundle/extensions/trasgospec/scripts/bash/discovery.sh
+- [x] T004 Sync installed copy at .specify/extensions/trasgospec/scripts/bash/discovery.sh
 
 **Checkpoint**: discovery.sh produces prd.md with a `**Status**` field. Tests pass.
 
