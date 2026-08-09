@@ -26,10 +26,10 @@
 - `.specify/` directory is gitignored — it is user-environment state managed by Spec Kit, not project source
 - The command follows the two-part extension pattern: a command file (AI instructions) and a script file (deterministic git status/diff gathering)
 - Commits are batched per skill invocation (one commit per skill run)
-- Commit message format is a flat list of changed files with one-liner descriptions, no tags or headers:
+- Commit message format is a flat list of changed files with one-liner descriptions, no tags or headers. File paths are relative to the repo root:
   ```
-  prd.md - populated problem statement and JTBD from discovery session
-  spec.md - created feature specification from PRD
+  specs/011-audit-and-logs/prd.md - populated problem statement and JTBD from discovery session
+  specs/011-audit-and-logs/spec.md - created feature specification from PRD
   ```
 - The command is repo-wide — it considers all changed/new files, not just the spec directory
 - The AI decides what to include in the commit based on judgment; when unsure (unrelated changes, binaries, secrets), it asks the user
