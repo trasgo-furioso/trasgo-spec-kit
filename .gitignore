@@ -13,7 +13,7 @@ bundle/*.zip
 .specify/
 
 # Auto-generated skill files from installed extensions
-.claude/skills/speckit-trasgospec-*/
+.claude/skills/speckit-*/
 
 # OS
 .DS_Store
