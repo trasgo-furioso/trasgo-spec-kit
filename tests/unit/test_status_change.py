@@ -8,6 +8,7 @@ runs the script via subprocess, and asserts the JSON output.
 """
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -156,3 +157,67 @@ class TestValidateStatus:
         data, rc = run_status_change(tmp_path, "validate")
         assert data["success"] is True
         assert data["old_status"] == "In Progress"
+
+
+# ---------------------------------------------------------------------------
+# US4: Unblock recovers previous status from git history
+# ---------------------------------------------------------------------------
+class TestUnblock:
+    """Verify unblock recovers previous status from git log."""
+
+    def test_unblock_recovers_previous_status(self, tmp_path):
+        # Setup git repo
+        make_specify_project(tmp_path, "specs/001-test")
+        create_spec_with_status(tmp_path, "specs/001-test", "Planning")
+        subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "initial"],
+            cwd=tmp_path, capture_output=True,
+            env={**os.environ, "GIT_AUTHOR_NAME": "test", "GIT_AUTHOR_EMAIL": "t@t",
+                 "GIT_COMMITTER_NAME": "test", "GIT_COMMITTER_EMAIL": "t@t"},
+        )
+        # Block the feature
+        run_status_change(tmp_path, "set", "blocked")
+        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "blocked"],
+            cwd=tmp_path, capture_output=True,
+            env={**os.environ, "GIT_AUTHOR_NAME": "test", "GIT_AUTHOR_EMAIL": "t@t",
+                 "GIT_COMMITTER_NAME": "test", "GIT_COMMITTER_EMAIL": "t@t"},
+        )
+        # Unblock
+        data, rc = run_status_change(tmp_path, "unblock")
+        assert data["success"] is True
+        assert data["new_status"] == "Planning"
+        assert data["recovered_from"] == "git"
+
+
+# ---------------------------------------------------------------------------
+# US5: Quality gate for Opportunity on prd.md
+# ---------------------------------------------------------------------------
+class TestQualityGate:
+    """Verify quality gate for Discovery → Opportunity transition."""
+
+    def test_quality_gate_passes_for_complete_prd(self, tmp_path):
+        make_specify_project(tmp_path, "specs/001-test")
+        create_prd_with_status(tmp_path, "specs/001-test", "Discovery", complete=True)
+        data, rc = run_status_change(tmp_path, "set", "opportunity")
+        assert data["success"] is True
+        assert data["new_status"] == "Opportunity"
+
+    def test_quality_gate_fails_for_incomplete_prd(self, tmp_path):
+        make_specify_project(tmp_path, "specs/001-test")
+        create_prd_with_status(tmp_path, "specs/001-test", "Discovery", complete=False)
+        data, rc = run_status_change(tmp_path, "set", "opportunity")
+        assert data["success"] is False
+        assert "gate_failures" in data
+        assert len(data["gate_failures"]) > 0
+
+    def test_quality_gate_skipped_for_spec_md(self, tmp_path):
+        """Quality gate only applies to prd.md, not spec.md."""
+        make_specify_project(tmp_path, "specs/001-test")
+        create_spec_with_status(tmp_path, "specs/001-test", "Discovery")
+        data, rc = run_status_change(tmp_path, "set", "opportunity")
+        assert data["success"] is True
+        assert data["new_status"] == "Opportunity"

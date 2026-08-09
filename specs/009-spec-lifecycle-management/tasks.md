@@ -130,13 +130,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T035 [P] [US4] Write failing test: status-change.sh unblock recovers previous status from git log in tests/unit/test_status_change.py
+- [x] T035 [P] [US4] Write failing test: status-change.sh unblock recovers previous status from git log in tests/unit/test_status_change.py
 
 ### Implementation for User Story 4
 
-- [ ] T036 [US4] Add `unblock` action to status-change.sh using `git log` to recover prior status at bundle/extensions/trasgospec/scripts/bash/status-change.sh
-- [ ] T037 [US4] Sync installed copy at .specify/extensions/trasgospec/scripts/bash/status-change.sh
-- [ ] T038 [US4] Run unblock tests: `.venv/bin/pytest tests/unit/test_status_change.py -v`
+- [x] T036 [US4] Add `unblock` action to status-change.sh using `git log` to recover prior status at bundle/extensions/trasgospec/scripts/bash/status-change.sh
+- [x] T037 [US4] ~~Sync installed copy~~ Handled by bundle install
+- [x] T038 [US4] Run unblock tests: `.venv/bin/pytest tests/unit/test_status_change.py -v`
 
 **Checkpoint**: Blocked features can be unblocked, reverting to their previous lifecycle phase recovered from git history.
 
@@ -150,15 +150,15 @@
 
 ### Tests for User Story 5
 
-- [ ] T039 [P] [US5] Write failing test: quality gate passes for complete PRD in tests/unit/test_status_change.py
-- [ ] T040 [P] [US5] Write failing test: quality gate fails for PRD missing Assumptions section in tests/unit/test_status_change.py
-- [ ] T041 [P] [US5] Write failing test: quality gate fails for PRD missing Jobs to Be Done in tests/unit/test_status_change.py
+- [x] T039 [P] [US5] Write failing test: quality gate passes for complete PRD in tests/unit/test_status_change.py
+- [x] T040 [P] [US5] Write failing test: quality gate fails for PRD missing Assumptions section in tests/unit/test_status_change.py
+- [x] T041 [P] [US5] Write failing test: quality gate fails for PRD missing Jobs to Be Done in tests/unit/test_status_change.py
 
 ### Implementation for User Story 5
 
-- [ ] T042 [US5] Add quality gate evaluation to status-change.sh for Opportunity transitions on prd.md at bundle/extensions/trasgospec/scripts/bash/status-change.sh
-- [ ] T043 [US5] Sync installed copy at .specify/extensions/trasgospec/scripts/bash/status-change.sh
-- [ ] T044 [US5] Run quality gate tests: `.venv/bin/pytest tests/unit/test_status_change.py -v`
+- [x] T042 [US5] Add quality gate evaluation to status-change.sh for Opportunity transitions on prd.md at bundle/extensions/trasgospec/scripts/bash/status-change.sh
+- [x] T043 [US5] ~~Sync installed copy~~ Handled by bundle install
+- [x] T044 [US5] Run quality gate tests: `.venv/bin/pytest tests/unit/test_status_change.py -v`
 
 **Checkpoint**: PRDs must pass the quality gate to advance to Opportunity. Incomplete PRDs are rejected with specific feedback.
 
@@ -168,9 +168,9 @@
 
 **Purpose**: Final validation and bundle consistency.
 
-- [ ] T045 [P] Run full unit test suite: `.venv/bin/pytest tests/unit/ -v`
-- [ ] T046 [P] Run quickstart.md validation scenarios
-- [ ] T047 Validate bundle manifest: `specify bundle validate --path bundle --offline`
+- [x] T045 [P] Run full unit test suite: `.venv/bin/pytest tests/unit/ -v`
+- [x] T046 [P] Run quickstart.md validation scenarios
+- [x] T047 Validate bundle manifest: `specify bundle validate --path bundle --offline`
 
 ---
 
