@@ -129,6 +129,13 @@ class TestDirectoryAndScaffold:
         prd_content = (tmp_path / data["prd_path"]).read_text()
         assert prd_content.startswith("# PRD: My Feature")
 
+    def test_prd_scaffold_has_status_discovery(self, tmp_path):
+        make_specify_project(tmp_path)
+        (tmp_path / "specs").mkdir()
+        data = run_discovery(tmp_path, "my-feature")
+        prd_content = (tmp_path / data["prd_path"]).read_text()
+        assert "**Status**: Discovery" in prd_content
+
     def test_prd_scaffold_has_dates(self, tmp_path):
         make_specify_project(tmp_path)
         (tmp_path / "specs").mkdir()
