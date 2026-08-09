@@ -73,16 +73,25 @@ if [ -d "$SPECS_DIR" ]; then
             .*) continue ;;
         esac
 
-        # Only process directories containing spec.md
-        [ -f "$spec_dir/spec.md" ] || continue
+        # Determine which file to scan (spec.md takes precedence over prd.md)
+        if [ -f "$spec_dir/spec.md" ]; then
+            spec_file="$spec_dir/spec.md"
+        elif [ -f "$spec_dir/prd.md" ]; then
+            spec_file="$spec_dir/prd.md"
+        else
+            continue
+        fi
 
-        spec_file="$spec_dir/spec.md"
-
-        # Extract title from "# Feature Specification: [TITLE]"
+        # Extract title from "# Feature Specification: [TITLE]" or "# PRD: [TITLE]"
         title=""
-        title_line="$(grep -m1 '^# Feature Specification:' "$spec_file" 2>/dev/null || true)"
+        title_line="$(grep -m1 '^# Feature Specification:\|^# PRD:' "$spec_file" 2>/dev/null || true)"
         if [ -n "$title_line" ]; then
-            title="${title_line#\# Feature Specification: }"
+            case "$title_line" in
+                "# Feature Specification:"*)
+                    title="${title_line#\# Feature Specification: }" ;;
+                "# PRD:"*)
+                    title="${title_line#\# PRD: }" ;;
+            esac
             # Trim whitespace
             title="$(printf '%s' "$title" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
         fi

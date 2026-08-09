@@ -48,18 +48,18 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T005 [P] [US1] Write failing test: scan-specs includes prd-only features in output in tests/unit/test_scan_specs.py
-- [ ] T006 [P] [US1] Write failing test: scan-specs extracts title from `# PRD:` heading in tests/unit/test_scan_specs.py
-- [ ] T007 [P] [US1] Write failing test: scan-specs reads `**Status**` from prd.md when no spec.md exists in tests/unit/test_scan_specs.py
-- [ ] T008 [P] [US1] Write failing test: spec.md takes precedence over prd.md when both exist in tests/unit/test_scan_specs.py
-- [ ] T009 [P] [US1] Write failing test: scan-specs reads `**Created**` from prd.md in tests/unit/test_scan_specs.py
+- [x] T005 [P] [US1] Write failing test: scan-specs includes prd-only features in output in tests/unit/test_scan_specs.py
+- [x] T006 [P] [US1] Write failing test: scan-specs extracts title from `# PRD:` heading in tests/unit/test_scan_specs.py
+- [x] T007 [P] [US1] Write failing test: scan-specs reads `**Status**` from prd.md when no spec.md exists in tests/unit/test_scan_specs.py
+- [x] T008 [P] [US1] Write failing test: spec.md takes precedence over prd.md when both exist in tests/unit/test_scan_specs.py
+- [x] T009 [P] [US1] Write failing test: scan-specs reads `**Created**` from prd.md in tests/unit/test_scan_specs.py
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Modify scan-specs.sh to check for prd.md when spec.md is absent (file selection logic) at bundle/extensions/trasgospec/scripts/bash/scan-specs.sh
-- [ ] T011 [US1] Add `# PRD:` title extraction pattern alongside `# Feature Specification:` in scan-specs.sh
-- [ ] T012 [US1] Sync installed copy at .specify/extensions/trasgospec/scripts/bash/scan-specs.sh
-- [ ] T013 [US1] Run all scan-specs tests and verify they pass: `.venv/bin/pytest tests/unit/test_scan_specs.py -v`
+- [x] T010 [US1] Modify scan-specs.sh to check for prd.md when spec.md is absent (file selection logic) at bundle/extensions/trasgospec/scripts/bash/scan-specs.sh
+- [x] T011 [US1] Add `# PRD:` title extraction pattern alongside `# Feature Specification:` in scan-specs.sh
+- [x] T012 [US1] Sync installed copy at .specify/extensions/trasgospec/scripts/bash/scan-specs.sh
+- [x] T013 [US1] Run all scan-specs tests and verify they pass: `.venv/bin/pytest tests/unit/test_scan_specs.py -v`
 
 **Checkpoint**: PRD-only features appear on the roadmap with correct title, status, and created date. `spec.md` takes precedence when both exist.
 
