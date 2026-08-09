@@ -103,3 +103,29 @@ hooks:
     prompt: Execute speckit.trasgospec.flow-nudge?
     description: Suggest PR is ready for final review
     condition: null
+  before_discovery:
+  - extension: trasgospec
+    command: speckit.trasgospec.flow-gate
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Execute speckit.trasgospec.flow-gate?
+    description: GitHub Flow — require feature branch
+    condition: null
+  after_discovery:
+  - extension: trasgospec
+    command: speckit.trasgospec.status
+    enabled: true
+    optional: false
+    priority: 5
+    prompt: Execute speckit.trasgospec.status?
+    description: Lifecycle — advance status to Opportunity
+    condition: null
+  - extension: trasgospec
+    command: speckit.trasgospec.flow-nudge
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Execute speckit.trasgospec.flow-nudge?
+    description: Suggest next steps after discovery
+    condition: null

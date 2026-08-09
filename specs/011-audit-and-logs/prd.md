@@ -2,7 +2,7 @@
 
 **Created**: 2026-08-09
 **Discovery Session**: 2026-08-09
-**Status**: Discovery
+**Status**: Planning
 
 ## Problem Statement
 
@@ -12,7 +12,7 @@
 
 **Current Alternatives**: Manual git commits after each artifact change. This is easily forgotten, especially during interactive sessions where multiple artifacts are created or updated in rapid succession. When forgotten, untracked files are lost on branch switches.
 
-**Desired Outcome**: Every artifact change triggers an automatic git commit with a structured, grep-filterable message. The commit history becomes the audit log — showing the complete document lifecycle: who changed what file, when, and why (which skill or manual action produced the change). Users can run `git log --grep` to reconstruct the full history of any artifact.
+**Desired Outcome**: Every artifact change triggers an automatic git commit with a structured, grep-filterable message. The commit history becomes the audit log — showing the complete document lifecycle: who changed what file, when, and why (which skill or manual action produced the change). Users can run `git log --grep='[speckit:audit]'` to reconstruct the full history of any artifact.
 
 ## Jobs to Be Done
 
@@ -23,7 +23,15 @@
 ## Assumptions
 
 - Git is always available in trasgospec projects (the bundle requires a git repository)
-- Automatic commits use a structured message format with a filterable prefix (e.g., `[speckit:audit]`) so they can be distinguished from manual commits and filtered with `git log --grep`
-- Commit messages include: the artifact path, the skill/action that triggered the change, and a brief description of what changed
-- Automatic commits are granular (one per artifact change) rather than batched, to preserve precise audit trails
+- Commits are batched per skill invocation (one commit per skill run), not per individual artifact change — balances auditability with commit noise
+- Commit message format is a flat list of changed files with one-liner descriptions, ending with `[speckit:audit]` tag on its own line:
+  ```
+  prd.md - populated problem statement and JTBD from discovery session
+  spec.md - created feature specification from PRD
+  [speckit:audit]
+  ```
+- The mechanism is hook-based: an `after_*` hook registered for each skill detects changed/new artifacts in the spec directory and commits them
+- The hook stages both new (untracked) and modified files within the spec directory
+- On successful commit, the hook displays a brief confirmation: `Committed: <file> - <description> [speckit:audit]`
+- When no artifacts changed, the hook displays: `No artifact changes to commit.`
 - The commit author reflects who or what made the change (human user's git config or agent identity)
