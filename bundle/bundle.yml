@@ -3,7 +3,7 @@ schema_version: "1.0"
 bundle:
   id: trasgospec
   name: Trasgo Spec Kit
-  version: "0.7.0"
+  version: "0.8.0"
   description: >-
     Journey-first product specification for spec-driven development
   author: Trasgo Furioso [https://github.com/trasgo-furioso]
@@ -17,4 +17,4 @@ requires:
 provides:
   extensions:
     - id: trasgospec
-      version: "0.7.0"
+      version: "0.8.0"

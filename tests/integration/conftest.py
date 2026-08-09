@@ -11,6 +11,7 @@ import subprocess
 import threading
 from pathlib import Path
 
+import yaml
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -18,21 +19,19 @@ BUNDLE_ROOT = PROJECT_ROOT / "bundle"
 EXTENSION_DIR = BUNDLE_ROOT / "extensions" / "trasgospec"
 CATALOG_PORT = 8888
 
-# Read version dynamically from bundle.yml so catalogs stay in sync
-_BUNDLE_VERSION = "0.6.0"
-_bundle_yml = BUNDLE_ROOT / "bundle.yml"
-if _bundle_yml.exists():
-    for _line in _bundle_yml.read_text().splitlines():
-        _line = _line.strip()
-        if _line.startswith("version:"):
-            _BUNDLE_VERSION = _line.split(":", 1)[1].strip().strip('"').strip("'")
-            break
 
-# Count commands from extension.yml
-_CMD_COUNT = 6
-_ext_yml = EXTENSION_DIR / "extension.yml"
-if _ext_yml.exists():
-    _CMD_COUNT = _ext_yml.read_text().count("- name:")
+def _read_bundle_metadata():
+    """Read version and command count from bundle manifests."""
+    with open(BUNDLE_ROOT / "bundle.yml") as f:
+        bundle_data = yaml.safe_load(f)
+    with open(EXTENSION_DIR / "extension.yml") as f:
+        ext_data = yaml.safe_load(f)
+    version = bundle_data["bundle"]["version"]
+    command_count = len(ext_data["provides"]["commands"])
+    return version, command_count
+
+
+_BUNDLE_VERSION, _COMMAND_COUNT = _read_bundle_metadata()
 
 # Test bundle catalog that points download_url to the local HTTP server
 _TEST_BUNDLE_CATALOG = {
@@ -65,7 +64,7 @@ _TEST_EXTENSION_CATALOG = {
             "category": "utility",
             "effect": "read-write",
             "requires": {"speckit_version": ">=0.15.0"},
-            "provides": {"commands": _CMD_COUNT},
+            "provides": {"commands": _COMMAND_COUNT},
             "tags": ["specification"],
             "verified": False,
         }

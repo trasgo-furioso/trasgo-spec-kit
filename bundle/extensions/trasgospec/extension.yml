@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "trasgospec"
   name: "Trasgo Spec Kit"
-  version: "0.7.0"
+  version: "0.8.0"
   description: "Journey-first product specification commands for spec-driven development."
   author: "Trasgo Furioso [https://github.com/trasgo-furioso]"
   license: "MIT"
@@ -39,6 +39,10 @@ provides:
       file: "commands/speckit.trasgospec.status.md"
       description: "Set, validate, or revert lifecycle status on a feature."
       aliases: ["trasgospec.status"]
+    - name: "speckit.trasgospec.commit"
+      file: "commands/speckit.trasgospec.commit.md"
+      description: "Auto-commit and push repository changes with structured messages."
+      aliases: ["trasgospec.commit"]
 
 hooks:
   before_specify:
@@ -47,9 +51,13 @@ hooks:
     priority: 5
     description: "Lifecycle — advance status to Planning"
   after_specify:
-    command: "speckit.trasgospec.flow-gate"
-    optional: false
-    description: "GitHub Flow — create/switch to feature branch after spec creation"
+    - command: "speckit.trasgospec.flow-gate"
+      optional: false
+      description: "GitHub Flow — create/switch to feature branch after spec creation"
+    - command: "speckit.trasgospec.commit"
+      optional: false
+      priority: 20
+      description: "Audit — auto-commit and push"
   before_clarify:
     command: "speckit.trasgospec.flow-gate"
     optional: false
@@ -83,28 +91,6 @@ hooks:
     command: "speckit.trasgospec.flow-gate"
     optional: false
     description: "GitHub Flow — require feature branch"
-  after_plan:
-    - command: "speckit.trasgospec.status"
-      optional: false
-      priority: 5
-      description: "Lifecycle — advance status to Ready to Dev"
-    - command: "speckit.trasgospec.flow-nudge"
-      optional: true
-      priority: 10
-      description: "Suggest opening a draft PR for this feature"
-  after_implement:
-    - command: "speckit.trasgospec.status"
-      optional: false
-      priority: 5
-      description: "Lifecycle — advance status to In Review"
-    - command: "speckit.trasgospec.flow-nudge"
-      optional: true
-      priority: 10
-      description: "Suggest marking PR as ready for review"
-  after_analyze:
-    command: "speckit.trasgospec.flow-nudge"
-    optional: true
-    description: "Suggest PR is ready for final review"
   before_discovery:
     command: "speckit.trasgospec.flow-gate"
     optional: false
@@ -118,3 +104,57 @@ hooks:
       optional: true
       priority: 10
       description: "Suggest next steps after discovery"
+    - command: "speckit.trasgospec.commit"
+      optional: false
+      priority: 20
+      description: "Audit — auto-commit and push"
+  after_clarify:
+    command: "speckit.trasgospec.commit"
+    optional: false
+    priority: 20
+    description: "Audit — auto-commit and push"
+  after_checklist:
+    command: "speckit.trasgospec.commit"
+    optional: false
+    priority: 20
+    description: "Audit — auto-commit and push"
+  after_plan:
+    - command: "speckit.trasgospec.status"
+      optional: false
+      priority: 5
+      description: "Lifecycle — advance status to Ready to Dev"
+    - command: "speckit.trasgospec.flow-nudge"
+      optional: true
+      priority: 10
+      description: "Suggest opening a draft PR for this feature"
+    - command: "speckit.trasgospec.commit"
+      optional: false
+      priority: 20
+      description: "Audit — auto-commit and push"
+  after_tasks:
+    command: "speckit.trasgospec.commit"
+    optional: false
+    priority: 20
+    description: "Audit — auto-commit and push"
+  after_implement:
+    - command: "speckit.trasgospec.status"
+      optional: false
+      priority: 5
+      description: "Lifecycle — advance status to In Review"
+    - command: "speckit.trasgospec.flow-nudge"
+      optional: true
+      priority: 10
+      description: "Suggest marking PR as ready for review"
+    - command: "speckit.trasgospec.commit"
+      optional: false
+      priority: 20
+      description: "Audit — auto-commit and push"
+  after_converge:
+    command: "speckit.trasgospec.commit"
+    optional: false
+    priority: 20
+    description: "Audit — auto-commit and push"
+  after_analyze:
+    command: "speckit.trasgospec.flow-nudge"
+    optional: true
+    description: "Suggest PR is ready for final review"
