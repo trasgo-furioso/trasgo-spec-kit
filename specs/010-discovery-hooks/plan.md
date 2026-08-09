@@ -69,13 +69,13 @@ bundle/extensions/trasgospec/
     └── discovery.sh                                     # NO CHANGE
 
 .specify/
-├── extensions.yml                                       # MODIFY: add before_discovery + after_discovery hook registrations
+├── extensions.yml                                       # NO CHANGE: it's managed by speckit
 └── extensions/trasgospec/scripts/bash/
     └── discovery.sh                                     # NO CHANGE
 
 .claude/skills/
 └── speckit-trasgospec-discovery/
-    └── SKILL.md                                         # MODIFY: mirror hook changes from command file (FR-007)
+    └── SKILL.md                                         # NO CHANGE: it's managed by speckit
 
 tests/unit/
 ├── test_hook_registration.py                            # MODIFY: add discovery hook entry tests
