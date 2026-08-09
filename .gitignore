@@ -26,3 +26,4 @@ Thumbs.db
 *.tmp
 .mcp.json
 .python-version
+speckit-code
