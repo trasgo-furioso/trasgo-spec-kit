@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-08
 
-**Status**: Draft
+**Status**: Delivered
 
 **Input**: User description: "A conversational discovery command (speckit-trasgospec-discovery) that guides users through interactive problem exploration before they commit to a spec. It asks targeted questions one at a time, challenges vague statements, and optionally uses web research to ground the conversation. The output is a structured PRD (prd.md) persisted in the specs directory following the existing numbering pattern. The PRD captures the problem statement, affected users, current alternatives, desired outcome, and user stories overview."
 
