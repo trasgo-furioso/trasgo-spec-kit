@@ -11,12 +11,27 @@ import subprocess
 import threading
 from pathlib import Path
 
+import yaml
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 BUNDLE_ROOT = PROJECT_ROOT / "bundle"
 EXTENSION_DIR = BUNDLE_ROOT / "extensions" / "trasgospec"
 CATALOG_PORT = 8888
+
+
+def _read_bundle_metadata():
+    """Read version and command count from bundle manifests."""
+    with open(BUNDLE_ROOT / "bundle.yml") as f:
+        bundle_data = yaml.safe_load(f)
+    with open(EXTENSION_DIR / "extension.yml") as f:
+        ext_data = yaml.safe_load(f)
+    version = bundle_data["bundle"]["version"]
+    command_count = len(ext_data["provides"]["commands"])
+    return version, command_count
+
+
+_BUNDLE_VERSION, _COMMAND_COUNT = _read_bundle_metadata()
 
 # Test bundle catalog that points download_url to the local HTTP server
 _TEST_BUNDLE_CATALOG = {
@@ -26,9 +41,9 @@ _TEST_BUNDLE_CATALOG = {
             "id": "trasgospec",
             "name": "Trasgo Spec Kit",
             "description": "Scaffold Spec Kit bundle for the claude integration",
-            "version": "0.2.0",
+            "version": _BUNDLE_VERSION,
             "role": "developer",
-            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-0.2.0.zip",
+            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-{_BUNDLE_VERSION}.zip",
         }
     },
 }
@@ -41,15 +56,15 @@ _TEST_EXTENSION_CATALOG = {
         "trasgospec": {
             "name": "Trasgo Spec Kit",
             "id": "trasgospec",
-            "version": "0.2.0",
+            "version": _BUNDLE_VERSION,
             "description": "Journey-first product specification commands.",
             "author": "Trasgo Furioso",
-            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-extension-0.2.0.zip",
+            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-extension-{_BUNDLE_VERSION}.zip",
             "license": "MIT",
             "category": "utility",
             "effect": "read-only",
             "requires": {"speckit_version": ">=0.15.0"},
-            "provides": {"commands": 2},
+            "provides": {"commands": _COMMAND_COUNT},
             "tags": ["specification"],
             "verified": False,
         }

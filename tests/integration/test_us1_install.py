@@ -55,7 +55,8 @@ class TestBundleListAfterInstall:
         # Assert
         assert result.returncode == 0
         assert "trasgospec" in result.stdout
-        assert "0.2.0" in result.stdout
+        from tests.integration.conftest import _BUNDLE_VERSION
+        assert _BUNDLE_VERSION in result.stdout
 
 
 class TestIdempotentReinstall:
@@ -107,7 +108,8 @@ class TestInstallFromLocalPath:
 
         # Assert
         assert "trasgospec" in result.stdout
-        assert "0.2.0" in result.stdout
+        from tests.integration.conftest import _BUNDLE_VERSION
+        assert _BUNDLE_VERSION in result.stdout
 
     def test_local_path_install_delivers_components(self, project_with_extension_catalog):
         """Verify install reports non-zero component count."""
