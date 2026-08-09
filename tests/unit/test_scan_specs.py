@@ -280,6 +280,84 @@ class TestJsonOutputContract:
         assert '"quotes"' in spec["title"] or "quotes" in spec["title"]
 
 
+def create_prd(specs_dir: Path, name: str, title: str = None,
+               status: str = None, created: str = None):
+    """Helper to create a spec directory with prd.md containing given fields."""
+    spec_dir = specs_dir / name
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    lines = []
+    if title is not None:
+        lines.append(f"# PRD: {title}")
+    if created is not None:
+        lines.append(f"\n**Created**: {created}")
+    if status is not None:
+        lines.append(f"\n**Status**: {status}")
+    (spec_dir / "prd.md").write_text("\n".join(lines) + "\n")
+    return spec_dir
+
+
+class TestPrdScanning:
+    """US1: scan-specs.sh includes PRD-only features on the roadmap."""
+
+    def test_includes_prd_only_features(self, tmp_path):
+        make_specify_project(tmp_path)
+        specs = tmp_path / "specs"
+        create_prd(specs, "001-idea", "My Idea", "Discovery", "2026-08-09")
+        result = run_scan_specs(tmp_path)
+        assert len(result["specs"]) == 1
+        assert result["specs"][0]["id"] == "001-idea"
+
+    def test_extracts_title_from_prd_heading(self, tmp_path):
+        make_specify_project(tmp_path)
+        specs = tmp_path / "specs"
+        create_prd(specs, "001-idea", "Audit and Logs", "Discovery", "2026-08-09")
+        result = run_scan_specs(tmp_path)
+        assert result["specs"][0]["title"] == "Audit and Logs"
+
+    def test_reads_status_from_prd(self, tmp_path):
+        make_specify_project(tmp_path)
+        specs = tmp_path / "specs"
+        create_prd(specs, "001-idea", "My Idea", "Discovery", "2026-08-09")
+        result = run_scan_specs(tmp_path)
+        assert result["specs"][0]["status"] == "Discovery"
+
+    def test_spec_takes_precedence_over_prd(self, tmp_path):
+        make_specify_project(tmp_path)
+        specs = tmp_path / "specs"
+        spec_dir = create_prd(specs, "001-feature", "PRD Title", "Discovery", "2026-08-09")
+        (spec_dir / "spec.md").write_text(
+            "# Feature Specification: Spec Title\n"
+            "**Status**: Planning\n"
+            "**Created**: 2026-08-09\n"
+        )
+        result = run_scan_specs(tmp_path)
+        assert result["specs"][0]["title"] == "Spec Title"
+        assert result["specs"][0]["status"] == "Planning"
+
+    def test_reads_created_from_prd(self, tmp_path):
+        make_specify_project(tmp_path)
+        specs = tmp_path / "specs"
+        create_prd(specs, "001-idea", "My Idea", "Discovery", "2026-08-09")
+        result = run_scan_specs(tmp_path)
+        assert result["specs"][0]["created"] == "2026-08-09"
+
+    def test_prd_and_spec_features_mixed(self, tmp_path):
+        make_specify_project(tmp_path)
+        specs = tmp_path / "specs"
+        create_prd(specs, "001-idea", "Idea", "Discovery", "2026-08-09")
+        create_spec(specs, "002-feature", "Feature", "Planning", "2026-08-08")
+        result = run_scan_specs(tmp_path)
+        ids = [s["id"] for s in result["specs"]]
+        assert ids == ["001-idea", "002-feature"]
+
+    def test_directory_without_prd_or_spec_excluded(self, tmp_path):
+        make_specify_project(tmp_path)
+        specs = tmp_path / "specs"
+        (specs / "001-empty").mkdir(parents=True)
+        result = run_scan_specs(tmp_path)
+        assert len(result["specs"]) == 0
+
+
 class TestTimestampNaming:
     """T028: Verify script works with timestamp-based directory naming."""
 

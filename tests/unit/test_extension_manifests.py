@@ -48,11 +48,11 @@ class TestTrasgospecManifest:
         assert "requires" in manifest
         assert "speckit_version" in manifest["requires"]
 
-    def test_provides_five_commands(self):
+    def test_provides_six_commands(self):
         manifest = load_extension_manifest("trasgospec")
         assert "provides" in manifest
         commands = manifest["provides"]["commands"]
-        assert len(commands) == 5
+        assert len(commands) == 6
 
     def test_command_fields(self):
         manifest = load_extension_manifest("trasgospec")

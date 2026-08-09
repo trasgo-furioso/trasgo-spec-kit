@@ -18,6 +18,22 @@ BUNDLE_ROOT = PROJECT_ROOT / "bundle"
 EXTENSION_DIR = BUNDLE_ROOT / "extensions" / "trasgospec"
 CATALOG_PORT = 8888
 
+# Read version dynamically from bundle.yml so catalogs stay in sync
+_BUNDLE_VERSION = "0.6.0"
+_bundle_yml = BUNDLE_ROOT / "bundle.yml"
+if _bundle_yml.exists():
+    for _line in _bundle_yml.read_text().splitlines():
+        _line = _line.strip()
+        if _line.startswith("version:"):
+            _BUNDLE_VERSION = _line.split(":", 1)[1].strip().strip('"').strip("'")
+            break
+
+# Count commands from extension.yml
+_CMD_COUNT = 6
+_ext_yml = EXTENSION_DIR / "extension.yml"
+if _ext_yml.exists():
+    _CMD_COUNT = _ext_yml.read_text().count("- name:")
+
 # Test bundle catalog that points download_url to the local HTTP server
 _TEST_BUNDLE_CATALOG = {
     "schema_version": "1.0",
@@ -25,10 +41,10 @@ _TEST_BUNDLE_CATALOG = {
         "trasgospec": {
             "id": "trasgospec",
             "name": "Trasgo Spec Kit",
-            "description": "Scaffold Spec Kit bundle for the claude integration",
-            "version": "0.2.0",
+            "description": "Journey-first product specification for spec-driven development",
+            "version": _BUNDLE_VERSION,
             "role": "developer",
-            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-0.2.0.zip",
+            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-{_BUNDLE_VERSION}.zip",
         }
     },
 }
@@ -41,15 +57,15 @@ _TEST_EXTENSION_CATALOG = {
         "trasgospec": {
             "name": "Trasgo Spec Kit",
             "id": "trasgospec",
-            "version": "0.2.0",
+            "version": _BUNDLE_VERSION,
             "description": "Journey-first product specification commands.",
             "author": "Trasgo Furioso",
-            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-extension-0.2.0.zip",
+            "download_url": f"http://localhost:{CATALOG_PORT}/trasgospec-extension-{_BUNDLE_VERSION}.zip",
             "license": "MIT",
             "category": "utility",
-            "effect": "read-only",
+            "effect": "read-write",
             "requires": {"speckit_version": ">=0.15.0"},
-            "provides": {"commands": 2},
+            "provides": {"commands": _CMD_COUNT},
             "tags": ["specification"],
             "verified": False,
         }
@@ -168,6 +184,23 @@ def project_with_extension_catalog(clean_project, extension_catalog_url):
         text=True,
     )
     assert result.returncode == 0, f"extension catalog add failed: {result.stderr}"
+    return clean_project
+
+
+@pytest.fixture
+def project_with_dev_extension(clean_project):
+    """Clean project with trasgospec extension installed from local source via --dev."""
+    result = subprocess.run(
+        ["specify", "extension", "add", str(EXTENSION_DIR), "--dev"],
+        cwd=clean_project,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, (
+        f"extension add --dev failed (exit {result.returncode})\n"
+        f"  stdout: {result.stdout.strip()}\n"
+        f"  stderr: {result.stderr.strip()}"
+    )
     return clean_project
 
 
