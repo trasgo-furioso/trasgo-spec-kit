@@ -6,3 +6,5 @@ preset:
   version: "0.9.0"
   description: "Templates for trasgospec artifact-producing commands."
   author: "Trasgo Furioso [https://github.com/trasgo-furioso]"
+  priority: 50
+  strategy: "append"
