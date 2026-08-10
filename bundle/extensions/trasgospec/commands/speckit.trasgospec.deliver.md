@@ -34,9 +34,26 @@ Execute pull request actions at workflow milestones. This command runs as a mand
    - Replace `{{spec_title}}` and `{{spec_summary}}` placeholders in both title and body
    - Also replace `{{spec_dir}}` in the title with the spec directory basename
 
-4. Check `suggested_action` to determine what to do:
+4. **Update existing PR title and body** (when a PR exists):
 
-   - **`none`**: No action needed. Display "PR is up to date." or nothing.
+   If `has_open_pr` is `true` and `gh_integration` is `true` and `gh_available` is `true`:
+   - Run `gh pr edit --title "<interpolated_title>" --body "<interpolated_body>"`
+   - If successful: Display "Updated PR #<pr_number> title and description."
+   - If it fails: Display the error and continue (do NOT block the workflow)
+
+   If `has_open_pr` is `true` and (`gh_integration` is `false` OR `gh_available` is `false`):
+   - Display:
+     ```
+     PR Update Suggested: Update title and description
+
+       PR: #<pr_number> (<pr_url>)
+
+       Run: gh pr edit --title "..." --body "..."
+     ```
+
+5. Check `suggested_action` to determine what additional action to take:
+
+   - **`none`**: No further action needed.
 
    - **`create_draft`**: Create a draft PR.
 
@@ -86,5 +103,5 @@ Execute pull request actions at workflow milestones. This command runs as a mand
        This PR is ready for team review and merge.
      ```
 
-5. If `gh_available` is `false` and `gh_integration` is `true`:
+6. If `gh_available` is `false` and `gh_integration` is `true`:
    - Display once: "Note: `gh` CLI not found. Install it for automated PR management, or set `gh_integration: false` in `.specify/extensions.yml`."

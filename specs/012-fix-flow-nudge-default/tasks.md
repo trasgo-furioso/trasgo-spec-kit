@@ -58,7 +58,9 @@
 - [x] T013 [US1] Rewrite `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` to remove confirmation prompts — execute `gh pr create`/`gh pr ready` directly when `suggested_action` is `create_draft` or `mark_ready`
 - [x] T014 [US1] Run `test_deliver.py` — verify hook registration tests pass
 
-**Checkpoint**: Deliver auto-executes at all milestones. No confirmation prompts.
+- [x] T031 [US1] Update `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` to update existing PR title and body via `gh pr edit` when a PR already exists
+
+**Checkpoint**: Deliver auto-executes at all milestones. No confirmation prompts. Existing PRs get updated.
 
 ---
 
