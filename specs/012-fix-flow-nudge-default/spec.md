@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-10
 
-**Status**: Planning
+**Status**: In Review
 
 **Input**: User description: "Bugfix — continuation of 009-spec-lifecycle-management. Flow-nudge hooks are registered as optional: true, which means the skill hook processor only displays a suggestion block instead of auto-executing the command. PRs are never created automatically."
 

@@ -101,7 +101,7 @@ hooks:
       priority: 5
       description: "Lifecycle — advance status to Opportunity"
     - command: "speckit.trasgospec.flow-nudge"
-      optional: true
+      optional: false
       priority: 10
       description: "Suggest next steps after discovery"
     - command: "speckit.trasgospec.commit"
@@ -124,7 +124,7 @@ hooks:
       priority: 5
       description: "Lifecycle — advance status to Ready to Dev"
     - command: "speckit.trasgospec.flow-nudge"
-      optional: true
+      optional: false
       priority: 10
       description: "Suggest opening a draft PR for this feature"
     - command: "speckit.trasgospec.commit"
@@ -142,7 +142,7 @@ hooks:
       priority: 5
       description: "Lifecycle — advance status to In Review"
     - command: "speckit.trasgospec.flow-nudge"
-      optional: true
+      optional: false
       priority: 10
       description: "Suggest marking PR as ready for review"
     - command: "speckit.trasgospec.commit"
@@ -156,5 +156,5 @@ hooks:
     description: "Audit — auto-commit and push"
   after_analyze:
     command: "speckit.trasgospec.flow-nudge"
-    optional: true
+    optional: false
     description: "Suggest PR is ready for final review"
