@@ -16,7 +16,7 @@
 
 **Current Alternatives**: Users must manually notice the suggestion block in the output and then run the deliver command themselves. Most users miss this entirely.
 
-**Desired Outcome**: The deliver command executes automatically by default at each workflow milestone — creating PRs, marking them ready, or flagging final review — without prompting for confirmation. The `optional` flag in extensions.yml serves as the user's feature flag: when set to `optional: true`, the command displays a suggestion block instead. When `gh` CLI is unavailable, the command also falls back to the suggestion block. PR body content is driven by a `pr-template.md` template distributed with the bundle, which users can override via the Spec Kit preset resolution stack.
+**Desired Outcome**: The deliver command executes automatically by default at each workflow milestone — creating PRs, marking them ready, or flagging final review — without prompting for confirmation. The `optional` flag in extensions.yml serves as the user's feature flag: when set to `optional: true`, the command displays a suggestion block instead. When `gh` CLI is unavailable, the command also falls back to the suggestion block. All artifact-producing commands use templates distributed with the bundle: `pr-template.md` for PR title/body and `commit-template.md` for commit message format. Users can override any template via the Spec Kit preset resolution stack.
 
 **Continuation**: This is a bugfix continuation of [009-spec-lifecycle-management](../009-spec-lifecycle-management/spec.md), which introduced the lifecycle status system and hook-driven transitions. The deliver hooks were configured as optional during that feature's implementation, but the intended behavior was automatic execution.
 
@@ -30,6 +30,7 @@
 - Q: Should the PR title format be hardcoded or customizable? → A: Title pattern in `pr-template.md` frontmatter (e.g., `title: "feat({{spec_dir}}): {{spec_title}}"`). Both title and body customizable in one file.
 - Q: Which placeholders should pr-template.md support? → A: Only `{{spec_title}}` and `{{spec_summary}}`. Branch, PR number, and other context is already on GitHub.
 - Q: Should the command be renamed now that it executes PR actions instead of nudging? → A: Yes. Rename `flow-nudge` to `deliver` (`speckit.trasgospec.deliver`). The command now delivers PRs, not nudges. Artifact renames deferred to implementation.
+- Q: Should the template pattern extend to other artifact-producing commands? → A: Yes. `trasgospec.commit` must use a `commit-template.md` that defaults to the current format (`<path> - <description>`, one line per file, no tags/prefixes/trailers). Users can override it via the preset resolution stack.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -95,6 +96,22 @@ The PR body content is generated from a `pr-template.md` template distributed wi
 
 ---
 
+### User Story 5 - Commit Message Driven by Template (Priority: P2)
+
+The commit message format is generated from a `commit-template.md` template distributed with the bundle, allowing users to customize commit output without modifying bundle code. The default template produces the current format: one line per file, `<repo-relative-path> - <description>`, no tags, prefixes, or trailers.
+
+**Why this priority**: Commit message format is a team convention. The template system allows teams to adopt their own conventions (e.g., conventional commits, Jira ticket prefixes) without forking the bundle.
+
+**Independent Test**: Can be tested by verifying the bundle includes `commit-template.md` in its preset, that `specify preset resolve commit-template` resolves it, and that the commit command uses the resolved template to compose the commit message.
+
+**Acceptance Scenarios**:
+
+1. **Given** the bundle distributes a `commit-template.md` in its preset templates, **When** a user installs the bundle, **Then** `specify preset resolve commit-template` resolves to the installed template.
+2. **Given** the commit command creates a commit, **When** it composes the commit message, **Then** it uses the resolved `commit-template.md` to structure the message, defaulting to the current one-line-per-file format.
+3. **Given** a user has placed a custom `commit-template.md` in `.specify/templates/overrides/`, **When** the commit command creates a commit, **Then** it uses the user's override template instead of the bundle default.
+
+---
+
 ### Edge Cases
 
 - What happens if the deliver script exits with a non-zero code during a mandatory hook? The hook processor should display the error but not block the overall workflow completion, since PR delivery is advisory.
@@ -102,6 +119,7 @@ The PR body content is generated from a `pr-template.md` template distributed wi
 - What happens if the user is on the main branch when deliver runs? The deliver script detects no feature branch context and returns an appropriate no-action response.
 - What happens if `gh pr create` fails (auth expired, rate limited, network error)? The command displays the error and continues the workflow without changing feature status. PR creation failures are transient and do not warrant a "Blocked" lifecycle state.
 - What happens if `pr-template.md` cannot be resolved? The command falls back to a hardcoded minimal PR body (title + spec summary).
+- What happens if `commit-template.md` cannot be resolved? The commit command falls back to the hardcoded default format (`<path> - <description>`, one line per file).
 
 ## Requirements *(mandatory)*
 
@@ -116,6 +134,8 @@ The PR body content is generated from a `pr-template.md` template distributed wi
 - **FR-007**: The bundle MUST distribute a `pr-template.md` in its preset templates directory, resolved via `specify preset resolve pr-template`.
 - **FR-008**: The deliver command MUST use the resolved `pr-template.md` to compose both PR title (from YAML frontmatter `title` field) and PR body (from markdown body), interpolating only `{{spec_title}}` and `{{spec_summary}}` placeholders. If the template cannot be resolved, it MUST fall back to a minimal hardcoded title and body.
 - **FR-009**: When `gh pr create` or `gh pr ready` fails, the command MUST display the error message and continue the workflow without changing feature lifecycle status.
+- **FR-010**: The bundle MUST distribute a `commit-template.md` in its preset templates directory, resolved via `specify preset resolve commit-template`.
+- **FR-011**: The `trasgospec.commit` command MUST use the resolved `commit-template.md` to compose commit messages. The default template MUST produce the current format: one line per file (`<repo-relative-path> - <description>`), no tags, prefixes, or trailers. If the template cannot be resolved, it MUST fall back to the same hardcoded default format.
 
 ## Success Criteria *(mandatory)*
 
