@@ -8,3 +8,6 @@ preset:
   author: "Trasgo Furioso [https://github.com/trasgo-furioso]"
   priority: 50
   strategy: "append"
+
+requires:
+  speckit_version: ">=0.15.0"
