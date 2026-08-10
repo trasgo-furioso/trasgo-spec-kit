@@ -61,14 +61,7 @@ Feature specifications live in `specs/<NNN-slug>/` (sequential numbering) or `sp
 
 ## Project Constitution
 
-The constitution (`.specify/memory/constitution.md`, v1.3.0) defines six non-negotiable principles:
-
-1. **Composition Over Creation** — compose existing Spec Kit primitives; new behavior must use the extension pattern
-2. **Spec Kit Native** — use existing Spec Kit features, never duplicate them
-3. **Documentation-Driven Development** — consult Spec Kit docs before making tooling choices
-4. **Idempotent & Traceable** — installations idempotent, full provenance tracking
-5. **Version-Pinned Distribution** — explicit version pins in manifests
-6. **Test-Driven Development** — tests written first (red-green-refactor), pytest only, no manual shell test execution
+Read `.specify/memory/constitution.md` for the full set of non-negotiable principles and governance rules. The constitution is the authoritative source — always consult it directly.
 
 ## Spec Kit Workflow
 

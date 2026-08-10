@@ -10,7 +10,9 @@ dist/
 bundle/*.zip
 
 # Spec Kit user-environment state (managed by Spec Kit per-user, not project source)
-.specify/
+.specify/*
+# But track project knowledge (constitution, decisions)
+!.specify/memory/
 
 # Auto-generated skill files from installed extensions
 .claude/skills/speckit-*/
