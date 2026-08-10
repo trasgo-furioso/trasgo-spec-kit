@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-08
 
-**Status**: Complete
+**Status**: Delivered
 
 **Input**: Restructure the trasgo-spec-kit bundle so its two components (hello and roadmap) are registered as extensions with proper extension.yml manifests, enabling the spec-kit installer to recognize and install them.
 

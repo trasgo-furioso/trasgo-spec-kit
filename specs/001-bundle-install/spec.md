@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-07
 
-**Status**: Complete
+**Status**: Delivered
 
 **Input**: User description: "given a project directory, when a user installs trasgo spec kit bundle using speckit catalog and bundle management tools, then trasgo bundle appears on the bundle list"
 
