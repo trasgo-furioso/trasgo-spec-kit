@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "trasgospec"
   name: "Trasgo Spec Kit"
-  version: "0.8.0"
+  version: "0.9.0"
   description: "Journey-first product specification commands for spec-driven development."
   author: "Trasgo Furioso [https://github.com/trasgo-furioso]"
   license: "MIT"
@@ -27,10 +27,10 @@ provides:
       file: "commands/speckit.trasgospec.flow-gate.md"
       description: "Enforce GitHub Flow branch discipline — gate or create feature branches."
       aliases: ["trasgospec.flow-gate"]
-    - name: "speckit.trasgospec.flow-nudge"
-      file: "commands/speckit.trasgospec.flow-nudge.md"
-      description: "Suggest PR lifecycle actions at workflow milestones."
-      aliases: ["trasgospec.flow-nudge"]
+    - name: "speckit.trasgospec.deliver"
+      file: "commands/speckit.trasgospec.deliver.md"
+      description: "Deliver PR lifecycle actions at workflow milestones."
+      aliases: ["trasgospec.deliver"]
     - name: "speckit.trasgospec.discovery"
       file: "commands/speckit.trasgospec.discovery.md"
       description: "Guide interactive problem exploration and produce a structured PRD."
@@ -100,10 +100,10 @@ hooks:
       optional: false
       priority: 5
       description: "Lifecycle — advance status to Opportunity"
-    - command: "speckit.trasgospec.flow-nudge"
+    - command: "speckit.trasgospec.deliver"
       optional: false
       priority: 10
-      description: "Suggest next steps after discovery"
+      description: "Deliver PR actions after discovery"
     - command: "speckit.trasgospec.commit"
       optional: false
       priority: 20
@@ -123,10 +123,10 @@ hooks:
       optional: false
       priority: 5
       description: "Lifecycle — advance status to Ready to Dev"
-    - command: "speckit.trasgospec.flow-nudge"
+    - command: "speckit.trasgospec.deliver"
       optional: false
       priority: 10
-      description: "Suggest opening a draft PR for this feature"
+      description: "Deliver draft PR for this feature"
     - command: "speckit.trasgospec.commit"
       optional: false
       priority: 20
@@ -141,10 +141,10 @@ hooks:
       optional: false
       priority: 5
       description: "Lifecycle — advance status to In Review"
-    - command: "speckit.trasgospec.flow-nudge"
+    - command: "speckit.trasgospec.deliver"
       optional: false
       priority: 10
-      description: "Suggest marking PR as ready for review"
+      description: "Deliver PR ready for review"
     - command: "speckit.trasgospec.commit"
       optional: false
       priority: 20
@@ -155,6 +155,6 @@ hooks:
     priority: 20
     description: "Audit — auto-commit and push"
   after_analyze:
-    command: "speckit.trasgospec.flow-nudge"
+    command: "speckit.trasgospec.deliver"
     optional: false
-    description: "Suggest PR is ready for final review"
+    description: "Deliver final review status"

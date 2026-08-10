@@ -1,0 +1,8 @@
+schema_version: "1.0"
+
+preset:
+  id: "trasgospec"
+  name: "Trasgo Spec Kit Preset"
+  version: "0.9.0"
+  description: "Templates for trasgospec artifact-producing commands."
+  author: "Trasgo Furioso [https://github.com/trasgo-furioso]"

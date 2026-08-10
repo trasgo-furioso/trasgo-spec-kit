@@ -53,7 +53,12 @@ Perform the full git cycle: detect all changed files repo-wide, use AI judgment 
 
 5. **Commit with structured message**:
 
-   Compose the commit message with one line per file:
+   Resolve the `commit-template` to determine message format:
+   - Attempt to read `.specify/templates/overrides/commit-template.md` first
+   - Then `.specify/presets/trasgospec/templates/commit-template.md`
+   - If neither exists, use the hardcoded default format below
+
+   Compose the commit message following the resolved template format. The default format is one line per file:
 
    ```
    <repo-relative-path> - <description>

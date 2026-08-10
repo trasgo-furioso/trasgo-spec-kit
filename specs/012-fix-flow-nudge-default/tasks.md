@@ -18,9 +18,9 @@
 
 **Purpose**: Create preset directory structure and update bundle manifest
 
-- [ ] T001 Create preset directory structure at `bundle/presets/trasgospec/templates/`
-- [ ] T002 Create preset manifest at `bundle/presets/trasgospec/preset.yml` with id `trasgospec` and version matching bundle
-- [ ] T003 Update `bundle/bundle.yml` to declare preset under `provides.presets`
+- [x] T001 Create preset directory structure at `bundle/presets/trasgospec/templates/`
+- [x] T002 Create preset manifest at `bundle/presets/trasgospec/preset.yml` with id `trasgospec` and version matching bundle
+- [x] T003 Update `bundle/bundle.yml` to declare preset under `provides.presets`
 
 ---
 
@@ -30,13 +30,13 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Write unit test verifying deliver.sh produces valid JSON contract in `tests/unit/test_deliver.py`
-- [ ] T005 Copy `bundle/extensions/trasgospec/scripts/bash/flow-nudge.sh` to `bundle/extensions/trasgospec/scripts/bash/deliver.sh` and update internal references
-- [ ] T006 Create `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` based on flow-nudge command with updated script reference
-- [ ] T007 Update command registration in `bundle/extensions/trasgospec/extension.yml`: rename `speckit.trasgospec.flow-nudge` to `speckit.trasgospec.deliver`, update file path, update aliases to `trasgospec.deliver`
-- [ ] T008 Update all hook registrations in `bundle/extensions/trasgospec/extension.yml` from `speckit.trasgospec.flow-nudge` to `speckit.trasgospec.deliver`
-- [ ] T009 Delete old files: `bundle/extensions/trasgospec/commands/speckit.trasgospec.flow-nudge.md` and `bundle/extensions/trasgospec/scripts/bash/flow-nudge.sh`
-- [ ] T010 Run `test_deliver.py` — verify tests pass with renamed script
+- [x] T004 Write unit test verifying deliver.sh produces valid JSON contract in `tests/unit/test_deliver.py`
+- [x] T005 Copy `bundle/extensions/trasgospec/scripts/bash/flow-nudge.sh` to `bundle/extensions/trasgospec/scripts/bash/deliver.sh` and update internal references
+- [x] T006 Create `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` based on flow-nudge command with updated script reference
+- [x] T007 Update command registration in `bundle/extensions/trasgospec/extension.yml`: rename `speckit.trasgospec.flow-nudge` to `speckit.trasgospec.deliver`, update file path, update aliases to `trasgospec.deliver`
+- [x] T008 Update all hook registrations in `bundle/extensions/trasgospec/extension.yml` from `speckit.trasgospec.flow-nudge` to `speckit.trasgospec.deliver`
+- [x] T009 Delete old files: `bundle/extensions/trasgospec/commands/speckit.trasgospec.flow-nudge.md` and `bundle/extensions/trasgospec/scripts/bash/flow-nudge.sh`
+- [x] T010 Run `test_deliver.py` — verify tests pass with renamed script
 
 **Checkpoint**: All flow-nudge references replaced with deliver. Old files removed.
 
@@ -50,13 +50,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Write unit test verifying all 4 deliver hooks in extension.yml have `optional: false` in `tests/unit/test_deliver.py`
+- [x] T011 [P] [US1] Write unit test verifying all 4 deliver hooks in extension.yml have `optional: false` in `tests/unit/test_deliver.py`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Set all 4 deliver hook registrations to `optional: false` in `bundle/extensions/trasgospec/extension.yml` (after_plan, after_implement, after_analyze, after_discovery)
-- [ ] T013 [US1] Rewrite `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` to remove confirmation prompts — execute `gh pr create`/`gh pr ready` directly when `suggested_action` is `create_draft` or `mark_ready`
-- [ ] T014 [US1] Run `test_deliver.py` — verify hook registration tests pass
+- [x] T012 [US1] Set all 4 deliver hook registrations to `optional: false` in `bundle/extensions/trasgospec/extension.yml` (after_plan, after_implement, after_analyze, after_discovery)
+- [x] T013 [US1] Rewrite `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` to remove confirmation prompts — execute `gh pr create`/`gh pr ready` directly when `suggested_action` is `create_draft` or `mark_ready`
+- [x] T014 [US1] Run `test_deliver.py` — verify hook registration tests pass
 
 **Checkpoint**: Deliver auto-executes at all milestones. No confirmation prompts.
 
@@ -70,13 +70,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T015 [P] [US4] Write unit test verifying `bundle/presets/trasgospec/templates/pr-template.md` exists and contains required frontmatter in `tests/unit/test_deliver.py`
+- [x] T015 [P] [US4] Write unit test verifying `bundle/presets/trasgospec/templates/pr-template.md` exists and contains required frontmatter in `tests/unit/test_deliver.py`
 
 ### Implementation for User Story 4
 
-- [ ] T016 [US4] Create `bundle/presets/trasgospec/templates/pr-template.md` with frontmatter `title: "feat({{spec_dir}}): {{spec_title}}"` and body with `{{spec_title}}` and `{{spec_summary}}` placeholders
-- [ ] T017 [US4] Update `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` to resolve `pr-template` via preset resolution, parse frontmatter for title pattern, interpolate `{{spec_title}}` and `{{spec_summary}}`, and fall back to hardcoded defaults if template not found
-- [ ] T018 [US4] Run `test_deliver.py` — verify template existence test passes
+- [x] T016 [US4] Create `bundle/presets/trasgospec/templates/pr-template.md` with frontmatter `title: "feat({{spec_dir}}): {{spec_title}}"` and body with `{{spec_title}}` and `{{spec_summary}}` placeholders
+- [x] T017 [US4] Update `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` to resolve `pr-template` via preset resolution, parse frontmatter for title pattern, interpolate `{{spec_title}}` and `{{spec_summary}}`, and fall back to hardcoded defaults if template not found
+- [x] T018 [US4] Run `test_deliver.py` — verify template existence test passes
 
 **Checkpoint**: PRs created by deliver use the pr-template for title and body.
 
@@ -90,13 +90,13 @@
 
 ### Tests for User Story 5
 
-- [ ] T019 [P] [US5] Write unit test verifying `bundle/presets/trasgospec/templates/commit-template.md` exists in `tests/unit/test_commit_template.py`
+- [x] T019 [P] [US5] Write unit test verifying `bundle/presets/trasgospec/templates/commit-template.md` exists in `tests/unit/test_commit_template.py`
 
 ### Implementation for User Story 5
 
-- [ ] T020 [US5] Create `bundle/presets/trasgospec/templates/commit-template.md` with format instructions for one-line-per-file messages (`<repo-relative-path> - <description>`, no tags/prefixes/trailers)
-- [ ] T021 [US5] Update `bundle/extensions/trasgospec/commands/speckit.trasgospec.commit.md` to resolve `commit-template` via preset resolution and use template instructions when composing messages, falling back to hardcoded format if template not found
-- [ ] T022 [US5] Run `test_commit_template.py` — verify template existence test passes
+- [x] T020 [US5] Create `bundle/presets/trasgospec/templates/commit-template.md` with format instructions for one-line-per-file messages (`<repo-relative-path> - <description>`, no tags/prefixes/trailers)
+- [x] T021 [US5] Update `bundle/extensions/trasgospec/commands/speckit.trasgospec.commit.md` to resolve `commit-template` via preset resolution and use template instructions when composing messages, falling back to hardcoded format if template not found
+- [x] T022 [US5] Run `test_commit_template.py` — verify template existence test passes
 
 **Checkpoint**: Commit command uses commit-template for message format.
 
@@ -110,12 +110,12 @@
 
 ### Tests for User Story 2
 
-- [ ] T023 [P] [US2] Write unit test verifying deliver.sh exits code 0 and includes `suggested_action` when gh is not available in `tests/unit/test_deliver.py`
+- [x] T023 [P] [US2] Write unit test verifying deliver.sh exits code 0 and includes `suggested_action` when gh is not available in `tests/unit/test_deliver.py`
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Verify `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` displays suggestion block when `gh_available` is `false` or `gh_integration` is `false`, and report errors from `gh pr create`/`gh pr ready` without blocking workflow
-- [ ] T025 [US2] Run `test_deliver.py` — verify fallback tests pass
+- [x] T024 [US2] Verify `bundle/extensions/trasgospec/commands/speckit.trasgospec.deliver.md` displays suggestion block when `gh_available` is `false` or `gh_integration` is `false`, and report errors from `gh pr create`/`gh pr ready` without blocking workflow
+- [x] T025 [US2] Run `test_deliver.py` — verify fallback tests pass
 
 **Checkpoint**: Deliver degrades gracefully without gh.
 
@@ -129,7 +129,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Verify the deliver command file instructions handle both auto-execution (no prompt) and suggestion display modes correctly — no code changes expected, just validation that the hook processor's optional/mandatory distinction works with the new command
+- [x] T026 [US3] Verify the deliver command file instructions handle both auto-execution (no prompt) and suggestion display modes correctly — no code changes expected, just validation that the hook processor's optional/mandatory distinction works with the new command
 
 **Checkpoint**: Override mechanism works. Feature complete.
 
@@ -139,10 +139,10 @@
 
 **Purpose**: Final cleanup and validation
 
-- [ ] T027 Mirror all `bundle/extensions/trasgospec/extension.yml` changes to installed copy at `.specify/extensions/trasgospec/extension.yml`
-- [ ] T028 Mirror deliver command and script to installed copy at `.specify/extensions/trasgospec/`
-- [ ] T029 Run full test suite: `.venv/bin/pytest tests/unit/ -v`
-- [ ] T030 Run quickstart.md validation scenarios
+- [x] T027 Mirror all `bundle/extensions/trasgospec/extension.yml` changes to installed copy at `.specify/extensions/trasgospec/extension.yml`
+- [x] T028 Mirror deliver command and script to installed copy at `.specify/extensions/trasgospec/`
+- [x] T029 Run full test suite: `.venv/bin/pytest tests/unit/ -v`
+- [x] T030 Run quickstart.md validation scenarios
 
 ---
 
