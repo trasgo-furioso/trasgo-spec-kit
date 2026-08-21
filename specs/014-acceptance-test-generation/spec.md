@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-21
 
-**Status**: Draft
+**Status**: Ready to Dev
 
 **Input**: User description: "AI agent that converts acceptance criteria in spec.md files into Playwright E2E tests following Given=Arrange, When=Act, Then=Assert pattern. Analyzes the frontend implementation and creates user-perspective tests using Page Object Model and accessibility-first selectors. Generates the acceptance tests for implementation phases that tell the implementer agent when to stop."
 
