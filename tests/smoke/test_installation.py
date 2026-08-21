@@ -32,6 +32,10 @@ EXTENSION_CATALOG_URL = (
     f"https://raw.githubusercontent.com/trasgo-furioso/"
     f"trasgo-spec-kit/{BRANCH}/extension-catalog.json"
 )
+PRESET_CATALOG_URL = (
+    f"https://raw.githubusercontent.com/trasgo-furioso/"
+    f"trasgo-spec-kit/{BRANCH}/preset-catalog.json"
+)
 
 # Read expected version from local bundle.yml
 _EXPECTED_VERSION = "0.6.0"
@@ -86,6 +90,12 @@ def project_with_catalogs(clean_project):
         cwd=clean_project,
     )
     assert_command_ok(result, f"extension catalog add {EXTENSION_CATALOG_URL}")
+    result = run_specify(
+        "preset", "catalog", "add", PRESET_CATALOG_URL,
+        "--name", "trasgospec", "--install-allowed",
+        cwd=clean_project,
+    )
+    assert_command_ok(result, f"preset catalog add {PRESET_CATALOG_URL}")
     return clean_project
 
 

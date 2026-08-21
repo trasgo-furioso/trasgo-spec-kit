@@ -1,4 +1,4 @@
-"""Unit tests for bundle/extensions/trasgospec/scripts/bash/flow-nudge.sh.
+"""Unit tests for bundle/extensions/trasgospec/scripts/bash/deliver.sh (formerly flow-nudge.sh).
 
 Tests validate the script's JSON contract output per
 specs/005-github-flow-enforcement/contracts/flow-nudge-output.md.
@@ -15,7 +15,7 @@ from unittest.mock import patch
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-FLOW_NUDGE_SCRIPT = PROJECT_ROOT / "bundle" / "extensions" / "trasgospec" / "scripts" / "bash" / "flow-nudge.sh"
+DELIVER_SCRIPT = PROJECT_ROOT / "bundle" / "extensions" / "trasgospec" / "scripts" / "bash" / "deliver.sh"
 
 
 def init_git_repo(project_dir: Path, branch: str = "main"):
@@ -73,7 +73,7 @@ def run_flow_nudge(project_dir: Path, env_override: dict = None) -> dict:
     if env_override:
         env.update(env_override)
     result = subprocess.run(
-        ["bash", str(FLOW_NUDGE_SCRIPT)],
+        ["bash", str(DELIVER_SCRIPT)],
         cwd=project_dir,
         capture_output=True,
         text=True,

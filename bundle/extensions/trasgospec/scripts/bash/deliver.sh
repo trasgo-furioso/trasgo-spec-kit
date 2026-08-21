@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# flow-nudge.sh — Gather PR state and infer phase for PR lifecycle nudges.
+# deliver.sh — Gather PR state and infer phase for PR lifecycle delivery.
 #
 # Sources flow-context.sh for git-local state, then adds:
 # - gh availability and integration setting
@@ -37,13 +37,13 @@ REPO_ROOT="$(_find_specify_root "$PWD" || true)"
 # Run flow-context.sh and capture its output
 flow_context_script="$SCRIPT_DIR/flow-context.sh"
 if [ ! -f "$flow_context_script" ]; then
-    echo "flow-nudge: flow-context.sh not found at $flow_context_script" >&2
+    echo "deliver: flow-context.sh not found at $flow_context_script" >&2
     exit 1
 fi
 
 flow_context_json="$(bash "$flow_context_script" 2>/dev/null)"
 if [ -z "$flow_context_json" ]; then
-    echo "flow-nudge: flow-context.sh produced no output" >&2
+    echo "deliver: flow-context.sh produced no output" >&2
     exit 1
 fi
 
@@ -62,7 +62,7 @@ if command -v gh >/dev/null 2>&1; then
     gh_available="true"
 else
     gh_available="false"
-    echo "flow-nudge: gh not found, PR fields will be empty" >&2
+    echo "deliver: gh not found, PR fields will be empty" >&2
 fi
 
 # --- Read gh_integration setting ----------------------------------------------
@@ -108,7 +108,7 @@ if [ "$gh_available" = "true" ] && [ "$gh_integration" = "true" ]; then
     fi
 else
     if [ "$gh_integration" = "false" ]; then
-        echo "flow-nudge: gh_integration disabled, skipping PR queries" >&2
+        echo "deliver: gh_integration disabled, skipping PR queries" >&2
     fi
 fi
 
@@ -126,7 +126,7 @@ if [ -n "$spec_dir" ] && [ "$spec_dir" != "null" ]; then
         inferred_phase="plan"
     fi
 else
-    echo "flow-nudge: feature.json not found, cannot infer phase" >&2
+    echo "deliver: feature.json not found, cannot infer phase" >&2
 fi
 
 # --- Compute suggested action -------------------------------------------------
