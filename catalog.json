@@ -5,9 +5,9 @@
       "id": "trasgospec",
       "name": "Trasgo Spec Kit",
       "description": "Journey-first product specification for spec-driven development",
-      "version": "0.9.0",
+      "version": "0.10.0",
       "role": "developer",
-      "download_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/012-fix-flow-nudge-default/trasgospec-0.9.0.zip"
+      "download_url": "https://raw.githubusercontent.com/trasgo-furioso/trasgo-spec-kit/012-fix-flow-nudge-default/trasgospec-0.10.0.zip"
     }
   }
 }

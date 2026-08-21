@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "trasgospec"
   name: "Trasgo Spec Kit"
-  version: "0.9.0"
+  version: "0.10.0"
   description: "Journey-first product specification commands for spec-driven development."
   author: "Trasgo Furioso [https://github.com/trasgo-furioso]"
   license: "MIT"
