@@ -1,8 +1,8 @@
 <!--
 Sync Impact Report
-  Version change: 1.3.0 → 1.4.0 (MINOR)
+  Version change: 1.4.0 → 1.5.0 (MINOR)
   Modified principles: none
-  Added sections: Principle VII (Template-Driven Artifacts)
+  Added sections: Principle VIII (Bundle-Native Architecture)
   Removed sections: none
   Follow-up TODOs: none
 -->
@@ -59,6 +59,24 @@ resolution stack (`specify preset resolve <template-name>`). Users override
 templates by placing files in `.specify/templates/overrides/`. Commands MUST
 fall back to a hardcoded default if the template cannot be resolved.
 
+### VIII. Bundle-Native Architecture
+
+This project IS a Spec Kit bundle. All implementation planning MUST follow
+Spec Kit's component model and use the correct component type for each concern:
+
+- **Extensions** for new commands, hooks, and tool integrations.
+- **Presets** for customizable templates, terminology, and command overrides
+  (with explicit `priority` and `strategy`).
+- **Steps** for atomic workflow operations (unversioned, used inside workflows).
+- **Workflows** for multi-step automation pipelines that orchestrate steps.
+- **Bundles** for packaging and distributing a cohesive set of the above.
+
+New capabilities MUST be planned as one of these component types. Implementation
+plans MUST specify which component type each deliverable belongs to, declare it
+in `bundle.yml` under `provides`, and follow that component's schema and
+conventions. Ad-hoc scripts or tools that bypass the bundle component model are
+prohibited.
+
 ## Extension Two-Part Pattern
 
 Every extension command MUST follow the two-part pattern:
@@ -91,4 +109,4 @@ require:
 
 All PRs and reviews MUST verify compliance with these principles.
 
-**Version**: 1.4.0 | **Ratified**: 2026-07-15 | **Last Amended**: 2026-08-10
+**Version**: 1.5.0 | **Ratified**: 2026-07-15 | **Last Amended**: 2026-08-10
