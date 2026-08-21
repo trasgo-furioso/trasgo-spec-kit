@@ -31,6 +31,6 @@
 
 ## Notes
 
-- All items pass validation
-- FR-026 clarification resolved: template-driven approach selected per Principle VII
-- Spec is ready for `/speckit-clarify` or `/speckit-plan`
+- All items pass validation (16/16)
+- Clarification session 2026-08-21: 4 questions resolved (GWT structure, workflow placement, marker format, acceptance gate model)
+- Spec is ready for `/speckit-plan`

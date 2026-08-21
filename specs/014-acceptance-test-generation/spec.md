@@ -120,6 +120,15 @@ When the spec.md is updated (scenarios added, modified, or removed), the develop
 - What happens when a testing surface contract declares a part that the frontend code does not yet implement? The provider-verification test is generated and will fail until the component satisfies the contract -- this is the intended test-first workflow.
 - What happens when the frontend code exposes parts not declared in any contract? The agent ignores undeclared parts. Only contracted parts appear in the POM.
 
+## Clarifications
+
+### Session 2026-08-21
+
+- Q: Should GWT structure use Playwright's `test.step()` or plain inline comments? → A: `test.step()` — Playwright-native, visible in traces and HTML reports
+- Q: At what point in the workflow should this command be invoked? → A: `/speckit-tasks` creates tasks for acceptance test generation; `/speckit-implement` invokes the command to complete those tasks
+- Q: Should the traceability header marker format be specified here or deferred? → A: Deferred to planning phase — FR-016 captures intent, implementation decides format
+- Q: Should failing acceptance tests block implementation or serve as progressive targets? → A: Grouped by user story — each story's E2E tests are the acceptance gate for that story's implementation phase; phase is complete when that story's tests pass
+
 ## Requirements
 
 ### Functional Requirements
@@ -145,7 +154,7 @@ When the spec.md is updated (scenarios added, modified, or removed), the develop
 - **FR-011**: System MUST use accessibility-first selectors in page objects: `getByRole`, `getByLabel`, `getByText` preferred over CSS selectors; `data-testid` as fallback
 - **FR-012**: System MUST generate custom fixtures via `test.extend<>()` that inject page objects into tests
 - **FR-013**: System MUST NOT use hardcoded waits (`page.waitForTimeout`), brittle CSS selectors (`.class > div:nth-child(2)`), or create test interdependencies (shared mutable state between tests)
-- **FR-014**: System MUST structure each test body with clearly commented Arrange (Given), Act (When), and Assert (Then) sections
+- **FR-014**: System MUST structure each test body using Playwright's `test.step()` API to wrap Given (Arrange), When (Act), and Then (Assert) sections — e.g., `await test.step('Given an authenticated user', async () => { ... })`. This makes GWT sections visible in Playwright's trace viewer and HTML reports
 
 **Traceability**
 
@@ -178,7 +187,7 @@ When the spec.md is updated (scenarios added, modified, or removed), the develop
 
 - **FR-025**: This command is an AI-agent-only command (no bash script), following the precedent of `speckit.trasgospec.hello`. The command file contains YAML frontmatter (description only, no `scripts` key) and markdown body with agent instructions
 - **FR-026**: System MUST use the template resolution stack for the generated test file structure: check `.specify/templates/overrides/acceptance-test-template` first, then preset templates (`bundle/presets/trasgospec/templates/acceptance-test-template`), then fall back to hardcoded defaults. The template defines the output structure (imports, describe blocks, fixture setup pattern) and can be overridden by users per Principle VII
-- **FR-027**: System MUST NOT register any hooks -- this is a manually invoked command, not a lifecycle hook
+- **FR-027**: System MUST NOT register any hooks. The command is invoked by `/speckit-implement` when executing acceptance-test-generation tasks (created by `/speckit-tasks`), or manually by developers. `/speckit-tasks` MUST include acceptance test generation as a task when the spec contains acceptance scenarios. Implementation phases map to user stories — each story's generated E2E tests serve as the acceptance gate for that story's implementation phase. A story's phase is complete when all its acceptance tests pass
 
 ### Key Entities
 
@@ -211,7 +220,7 @@ When the spec.md is updated (scenarios added, modified, or removed), the develop
 - TypeScript is the default language for generated tests; JavaScript is used only when the existing Playwright config is `.js`
 - The developer may run this command before implementing the frontend (tests-first) -- generated page objects will use inferred selectors
 - Page objects do not extend a base class; composition via `test.extend` fixtures is the canonical pattern
-- The command is manually invoked (not a lifecycle hook) -- it is not part of the automatic `before_*`/`after_*` hook chain
+- The command is not a lifecycle hook (no `before_*`/`after_*` registration). It is invoked by the implementer agent during `/speckit-implement` to complete acceptance-test-generation tasks created by `/speckit-tasks`. It can also be invoked manually by developers at any time
 - The command does not install Playwright or any dependencies -- it only generates files
 - The `e2e/` directory is the default test output path when no Playwright config exists
 - Testing surface contracts (`contracts/testing-surface-*.md`) are generated by `/speckit-plan` during Phase 1 when the project involves UI components. The plan skill already supports "UI contracts for applications" in its contract generation instructions — the `testing-surface-contract` template (FR-028) makes the format explicit and standardized. This command consumes contracts but does not create them
