@@ -43,6 +43,10 @@ provides:
       file: "commands/speckit.trasgospec.commit.md"
       description: "Auto-commit and push repository changes with structured messages."
       aliases: ["trasgospec.commit"]
+    - name: "speckit.trasgospec.acceptance-tests"
+      file: "commands/speckit.trasgospec.acceptance-tests.md"
+      description: "Generate Playwright E2E tests from spec.md acceptance scenarios."
+      aliases: ["trasgospec.acceptance-tests"]
 
 hooks:
   before_specify:
